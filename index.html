@@ -2608,15 +2608,66 @@ document.querySelectorAll('.fade-in').forEach(el => fadeObserver.observe(el));
    导出/导入
    ================================================================ */
 document.getElementById('btnPublish').addEventListener('click', async function() {
-  // 下载 data.json 到本地
-  const dataJson = JSON.stringify(appData, null, 2);
-  const blob = new Blob([dataJson], {type:'application/json'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = 'data.json';
-  document.body.appendChild(a); a.click(); document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-  alert('✅ data.json 已下载！\n\n请把这个文件发给我，我帮你推送到网站。\n\n或者：打开 github.com/yifuzhu29-a11y/portfolio\n→ 点击 Upload files → 拖入 data.json → 提交');
+  const btn = this;
+  btn.textContent = '⏳ 发布中...'; btn.disabled = true;
+
+  let token = localStorage.getItem('gh_publish_token');
+  if(!token) {
+    token = prompt('🔑 首次使用需要 GitHub Token（只需输入一次）：\n\n获取：github.com/settings/tokens → Generate new token → 勾选 repo → 生成后复制过来');
+    if(!token) { btn.textContent = '🔗 生成链接'; btn.disabled = false; return; }
+    localStorage.setItem('gh_publish_token', token);
+  }
+
+  const repo = 'yifuzhu29-a11y/portfolio';
+  const cleanData = JSON.parse(JSON.stringify(appData));
+  // 删除内部标记字段
+  delete cleanData._sorted;
+
+  const jsonStr = JSON.stringify(cleanData);
+  // 用 TextEncoder 正确编码 UTF-8 → base64
+  const encoder = new TextEncoder();
+  const bytes = encoder.encode(jsonStr);
+  let binary = '';
+  bytes.forEach(b => binary += String.fromCharCode(b));
+  const base64 = btoa(binary);
+
+  // 先获取现有文件 sha
+  let sha = '';
+  try {
+    const r = await fetch(`https://api.github.com/repos/${repo}/contents/data.json`, {
+      headers: { 'Authorization': 'Bearer ' + token, 'Accept': 'application/vnd.github.v3+json' }
+    });
+    if(r.ok) { const d = await r.json(); sha = d.sha; }
+  } catch(e) {}
+
+  // 上传
+  const body = JSON.stringify({ message: '更新数据', content: base64, sha: sha || undefined });
+
+  try {
+    const resp = await fetch(`https://api.github.com/repos/${repo}/contents/data.json`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': 'Bearer ' + token,
+        'Accept': 'application/vnd.github.v3+json',
+        'Content-Type': 'application/json'
+      },
+      body: body
+    });
+
+    if(resp.ok) {
+      alert('✅ 发布成功！\n\n约 1 分钟后刷新：\nhttps://yifuzhu29-a11y.github.io/portfolio/');
+    } else if(resp.status === 401 || resp.status === 403) {
+      localStorage.removeItem('gh_publish_token');
+      alert('❌ Token 无效，请重新点击按钮并输入新的 Token。');
+    } else {
+      const err = await resp.json().catch(()=>({}));
+      alert('❌ 发布失败：' + (err.message || 'HTTP ' + resp.status) + '\n\n可改用导出备份→发给我→我帮你推。');
+    }
+  } catch(e) {
+    alert('❌ 网络错误：' + e.message + '\n\n请检查网络，或改用导出备份方式。');
+  }
+
+  btn.textContent = '🔗 生成链接'; btn.disabled = false;
 });
 
 document.getElementById('btnReset').addEventListener('click', async function() {
