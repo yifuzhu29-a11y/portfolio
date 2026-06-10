@@ -1,0 +1,2699 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>个人简历 — 求职作品集</title>
+<style>
+/* ================================================================
+   色彩变量：咖啡 + 抹茶绿 + 奶白
+   ================================================================ */
+:root {
+  /* 咖啡色系 */
+  --coffee-deep: #4A2722;
+  --coffee: #6B3D2E;
+  --coffee-light: #8B6F5E;
+  --coffee-pale: #C4A89C;
+  /* 抹茶绿色系 */
+  --matcha: #7B8D6E;
+  --matcha-light: #A8B89A;
+  --matcha-pale: #D4DDCE;
+  /* 奶白色系 */
+  --cream: #FBF7F2;
+  --white: #FFFFFF;
+  --cream-dark: #F0EBE4;
+  /* 功能色 */
+  --text: #3D2C26;
+  --text-secondary: #6B574E;
+  --text-hint: #A8998F;
+  --gold: #C4946B;
+  --red: #B8453A;
+  --green: #5B8C5A;
+  /* 圆角 & 阴影 */
+  --radius: 10px;
+  --radius-lg: 16px;
+  --shadow-sm: 0 1px 4px rgba(74,39,34,0.06);
+  --shadow: 0 2px 12px rgba(74,39,34,0.08);
+  --shadow-lg: 0 4px 24px rgba(74,39,34,0.12);
+  /* 字体 */
+  --font-fangsong: "FangSong", "仿宋", "STFangsong", "华文仿宋", serif;
+  --font-serif: "Noto Serif SC", "Source Han Serif SC", "思源宋体", "Songti SC", serif;
+  --font-sans: "Noto Sans SC", "Source Han Sans SC", "思源黑体", "Microsoft YaHei", sans-serif;
+  --transition: 0.25s ease;
+}
+
+/* ================================================================
+   基础重置
+   ================================================================ */
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 64px; }
+body {
+  font-family: var(--font-sans);
+  background: var(--cream);
+  color: var(--text);
+  line-height: 1.7;
+  font-size: 15px;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ================================================================
+   导航栏
+   ================================================================ */
+.navbar {
+  position: fixed; top:0; left:0; right:0; z-index:100;
+  height: 60px;
+  background: rgba(255,255,255,0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(139,111,94,0.15);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 28px;
+}
+.nav-brand {
+  font-family: var(--font-fangsong);
+  font-size: 20px;
+  font-weight: bold;
+  color: var(--coffee-deep);
+  letter-spacing: 2px;
+}
+.nav-links { display:flex; list-style:none; gap:2px; }
+.nav-links a {
+  color: var(--text-secondary);
+  text-decoration: none;
+  padding: 6px 16px; border-radius: 20px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.nav-links a:hover { color: var(--coffee); background: var(--cream-dark); }
+.nav-links a.active { color: var(--coffee-deep); background: rgba(196,148,107,0.25); font-weight: 600; }
+.nav-right { display:flex; align-items:center; gap:8px; }
+.nav-right .btn { white-space: nowrap; }
+
+/* ================================================================
+   通用板块
+   ================================================================ */
+.section { padding: 80px 28px; position: relative; }
+.section-inner { max-width: 1000px; margin:0 auto; position: relative; z-index: 1; }
+/* 板块间装饰分隔 */
+.section::after {
+  content: ''; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
+  width: 60px; height: 3px; border-radius: 2px;
+  background: linear-gradient(90deg, transparent, var(--coffee-pale), transparent);
+}
+.section:last-of-type::after { display:none; }
+.section-tag {
+  display: inline-block;
+  padding: 3px 14px;
+  font-size: 11px; font-weight: 700; letter-spacing: 3px;
+  color: var(--coffee-light);
+  border: 1px solid var(--coffee-pale);
+  border-radius: 20px;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+}
+.section-title {
+  font-family: var(--section-title-font);
+  font-size: 32px; font-weight: bold;
+  color: var(--coffee-deep);
+  margin-bottom: 12px;
+  position: relative;
+}
+.section-subtitle {
+  font-size: 15px; color: var(--text-secondary);
+  margin-bottom: 36px; max-width: 520px;
+}
+/* 板块背景色交替 */
+.section-light { background: var(--cream); }
+.section-matcha { background: var(--white); }
+
+/* 卡片升级 */
+.card-upgrade {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  padding: 28px 24px;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid rgba(139,111,94,0.06);
+  transition: all var(--transition);
+}
+.card-upgrade:hover {
+  box-shadow: var(--shadow);
+  border-color: rgba(139,111,94,0.15);
+}
+
+/* ================================================================
+   Hero 区
+   ================================================================ */
+.hero { padding: 100px 28px 72px; text-align: center; }
+/* Hero 背景板 */
+.hero-banner {
+  position: relative;
+  max-width: 700px; margin: 0 auto 0;
+  padding: 48px 32px 40px;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(160deg, #6B3D2E 0%, #8B6F5E 40%, #C4A89C 100%);
+  background-size: cover;
+  background-position: center;
+  color: #fff;
+  overflow: hidden;
+}
+.hero-banner::before {
+  content: ''; position: absolute; inset: 0;
+  background: rgba(0,0,0,0.2);
+  border-radius: var(--radius-lg);
+}
+.hero-banner > * { position: relative; z-index: 1; }
+.hero-photo {
+  width: 140px; height: 140px; border-radius: 50%;
+  object-fit: cover; margin-bottom: 24px;
+  border: 3px solid rgba(255,255,255,0.8);
+  box-shadow: var(--shadow-lg);
+  border: 3px solid var(--matcha-pale);
+  box-shadow: var(--shadow);
+}
+.hero-photo-placeholder {
+  width: 140px; height: 140px; border-radius: 50%;
+  margin: 0 auto 24px;
+  background: var(--matcha-pale);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 56px;
+}
+:root {
+  --hero-name-font: var(--font-fangsong);
+  --section-title-font: var(--font-serif);
+  --body-font: var(--font-sans);
+  --hero-name-color: #ffffff;
+  --hero-title-color: rgba(255,255,255,0.9);
+}
+body { font-family: var(--body-font); }
+.hero-banner .hero-name {
+  font-family: var(--hero-name-font);
+  font-size: 40px; font-weight: var(--hero-name-weight, bold);
+  color: var(--hero-name-color);
+  letter-spacing: 3px;
+  margin-bottom: 6px;
+  text-shadow: var(--hero-name-shadow, 0 2px 8px rgba(0,0,0,0.3));
+}
+.hero-banner .hero-title {
+  font-size: 17px; color: var(--hero-title-color);
+  margin-bottom: 12px;
+}
+.hero-banner .hero-meta {
+  display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;
+  font-size: 13px; color: rgba(255,255,255,0.7);
+  margin-bottom: 0;
+}
+.hero-banner .hero-meta span { display:flex; align-items:center; gap:4px; }
+.hero-bio {
+  max-width: 500px; margin: 0 auto 20px;
+  font-size: 14px; color: var(--text-secondary);
+  line-height: 1.8;
+}
+.hero-tags { display:flex; justify-content:center; flex-wrap:wrap; gap:8px; margin-top:16px; }
+.hero-actions { display:flex; justify-content:center; gap:10px; flex-wrap:wrap; }
+
+/* ================================================================
+   按钮
+   ================================================================ */
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 9px 22px; font-size: 14px; font-family: var(--font-sans);
+  border: none; border-radius: 24px;
+  cursor: pointer; transition: all var(--transition);
+  text-decoration: none;
+}
+.btn-primary { background: var(--coffee); color: #fff; }
+.btn-primary:hover { background: var(--coffee-deep); }
+.btn-outline {
+  background: transparent; color: var(--coffee);
+  border: 1.5px solid var(--coffee-pale);
+}
+.btn-outline:hover { border-color: var(--coffee); background: rgba(107,61,46,0.04); }
+.btn-matcha { background: var(--matcha); color: #fff; }
+.btn-matcha:hover { background: #6A7D5E; }
+.btn-sm { padding: 5px 14px; font-size: 12px; }
+.btn-danger { background: var(--red); color: #fff; }
+.btn-danger:hover { background: #A03D33; }
+
+/* ================================================================
+   标签
+   ================================================================ */
+.tag {
+  display: inline-block;
+  padding: 4px 14px; font-size: 12px;
+  border-radius: 20px;
+  background: var(--cream-dark);
+  color: var(--text-secondary);
+  border: 1px solid transparent;
+}
+.tag-active {
+  background: var(--matcha);
+  color: #fff;
+  border-color: var(--matcha);
+}
+.tag-outline {
+  background: transparent;
+  border: 1px solid var(--coffee-pale);
+  color: var(--coffee);
+}
+
+/* 技能标签卡片 */
+.skill-tag-card {
+  display:inline-flex; align-items:center; gap:6px;
+  padding:10px 18px; border-radius:12px;
+  background:var(--white);
+  border:1px solid var(--coffee-pale);
+  box-shadow:var(--shadow-sm);
+  font-size:14px; font-weight:500; color:var(--text);
+  transition:all var(--transition);
+  flex-direction:column; align-items:flex-start;
+}
+.skill-tag-card:hover {
+  box-shadow:var(--shadow);
+  border-color:var(--coffee-light);
+  transform:translateY(-1px);
+}
+/* ================================================================
+   技能区
+   ================================================================ */
+.skills-categories { display:flex; flex-direction:column; gap:28px; }
+.skill-cat-name {
+  font-family: var(--font-serif);
+  font-size: 18px; font-weight: bold;
+  color: var(--coffee); margin-bottom: 12px;
+  padding-bottom: 6px;
+  border-bottom: 2px solid var(--matcha-pale);
+}
+.skills-grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(240px,1fr)); gap:12px; }
+.skill-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:4px; }
+.skill-name { font-size: 14px; font-weight: 600; color: var(--text); }
+.skill-level { font-size: 12px; color: var(--text-hint); }
+.skill-bar {
+  height: 6px; background: var(--cream-dark); border-radius: 3px; overflow: hidden;
+}
+.skill-bar-fill {
+  height: 100%; border-radius: 3px;
+  background: linear-gradient(90deg, var(--matcha), var(--matcha-light));
+  transition: width 0.8s ease;
+}
+
+/* ================================================================
+   作品集
+   ================================================================ */
+.filter-bar { display:flex; flex-wrap:wrap; gap:8px; margin-bottom: 28px; }
+.filter-bar .tag { cursor:pointer; }
+.project-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+.project-card-large { grid-column: span 2; }
+.project-card-small { max-width: 260px; }
+.project-card {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(74,39,34,0.04), 0 4px 12px rgba(74,39,34,0.04);
+  cursor: pointer;
+  transition: all 0.35s cubic-bezier(0.25,0.46,0.45,0.94);
+  border: 1px solid rgba(139,111,94,0.06);
+}
+.project-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 8px 30px rgba(74,39,34,0.12), 0 2px 8px rgba(74,39,34,0.06);
+  border-color: var(--coffee-pale);
+}
+.project-card:hover .project-cover,
+.project-card:hover .project-cover-placeholder {
+  transform: scale(1.04);
+}
+.project-cover, .project-cover-placeholder {
+  transition: transform 0.5s ease;
+}
+.project-card.featured { grid-column: span 2; }
+.project-cover {
+  width: 100%; height: 200px; object-fit: cover;
+  background: linear-gradient(135deg, var(--matcha-pale), var(--cream-dark));
+}
+.project-cover-placeholder {
+  width: 100%; height: 200px;
+  background: linear-gradient(135deg, var(--matcha-pale), var(--cream-dark));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 52px;
+}
+.project-body { padding: 18px 20px 20px; }
+.project-name { font-size: 17px; font-weight: bold; color: var(--coffee-deep); margin-bottom: 6px; }
+.project-desc {
+  font-size: 13px; color: var(--text-secondary); line-height: 1.6;
+  display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2;
+  -webkit-box-orient: vertical; overflow: hidden;
+  margin-bottom: 10px;
+}
+.project-tags { display:flex; flex-wrap:wrap; gap:5px; margin-bottom:8px; }
+.project-date { font-size: 11px; color: var(--text-hint); }
+.project-link-hint { font-size: 12px; color: var(--matcha); }
+
+/* ================================================================
+   时间线（经历）
+   ================================================================ */
+.timeline { position:relative; padding-left:28px; }
+.timeline::before {
+  content:''; position:absolute; left:7px; top:4px; bottom:4px;
+  width:2px; background: var(--coffee-pale);
+}
+.timeline-item { position:relative; margin-bottom: 28px; }
+.timeline-item::before {
+  content:''; position:absolute;
+  left: -25px; top: 6px;
+  width: 10px; height: 10px; border-radius: 50%;
+  background: var(--matcha);
+  border: 2px solid var(--white);
+  box-shadow: 0 0 0 2px var(--matcha);
+}
+.timeline-date { font-size: 13px; color: var(--matcha); margin-bottom: 2px; font-weight: 600; }
+.timeline-title { font-size: 17px; font-weight: bold; color: var(--coffee-deep); }
+.timeline-subtitle { font-size: 14px; color: var(--text-secondary); margin-bottom: 4px; }
+.timeline-desc { font-size: 13px; color: var(--text-secondary); line-height: 1.7; white-space:pre-line; }
+
+/* ================================================================
+   联系区
+   ================================================================ */
+.contact-cards { display:grid; grid-template-columns: repeat(auto-fill, minmax(260px,1fr)); gap:14px; }
+.contact-card {
+  display: flex; align-items: center; gap: 14px;
+  padding: 18px 20px;
+  background: var(--white);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  text-decoration: none; color: var(--text);
+  transition: all var(--transition);
+  border: 1px solid rgba(139,111,94,0.06);
+}
+.contact-card:hover { box-shadow: var(--shadow); border-color: var(--matcha-light); }
+.contact-icon {
+  width: 44px; height: 44px; border-radius: 12px;
+  background: var(--matcha-pale);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; flex-shrink: 0;
+}
+.contact-label { font-size: 11px; color: var(--text-hint); }
+.contact-value { font-size: 14px; color: var(--text); font-weight: 500; }
+
+/* ================================================================
+   关于我
+   ================================================================ */
+.about-text {
+  font-size: 15px; color: var(--text-secondary);
+  line-height: 1.9; white-space: pre-line;
+  max-width: 680px;
+}
+.about-hobbies { display:flex; flex-wrap:wrap; gap:8px; margin-top:16px; }
+
+/* ================================================================
+   页脚
+   ================================================================ */
+.footer {
+  text-align: center; padding: 32px 28px;
+  border-top: 1px solid rgba(139,111,94,0.08);
+  color: var(--text-hint); font-size: 12px;
+}
+.footer .btn { margin: 0 4px; }
+
+/* ================================================================
+   弹窗
+   ================================================================ */
+.modal-overlay {
+  position: fixed; inset:0;
+  background: rgba(74,39,34,0.45);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 200; animation: fadeIn 0.2s ease;
+}
+.modal {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  max-width: 620px; width: 92%; max-height: 85vh;
+  overflow-y: auto; padding: 30px;
+  position: relative;
+}
+.modal-close {
+  position: absolute; top: 12px; right: 12px;
+  width: 34px; height: 34px; border-radius: 50%;
+  border: none; background: var(--cream-dark); color: var(--coffee);
+  font-size: 16px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+.modal-close:hover { background: var(--coffee-pale); color: #fff; }
+.modal-title { font-family: var(--font-serif); font-size: 22px; font-weight: bold; color: var(--coffee-deep); margin-bottom: 14px; }
+
+/* 轮播 — Apple Cover Flow */
+.carousel { position:relative; margin-bottom:18px; height:360px; overflow:hidden; perspective:2000px; background:transparent; border-radius:var(--radius); }
+.carousel-track { position:relative; height:100%; width:100%; }
+.carousel-card { position:absolute; top:50%; left:50%; width:65%; max-width:850px; border-radius:0; overflow:visible; cursor:pointer; transition:all 0.45s cubic-bezier(0.25,0.46,0.45,0.94); background:none; }
+.carousel-card::after { display:none; }
+.carousel-card img {
+  width:100%; display:block; max-height:340px; object-fit:contain;
+  background:none; border-radius:4px;
+  box-shadow:0 4px 30px rgba(0,0,0,0.12);
+  transition:box-shadow 0.45s ease;
+}
+.carousel-placeholder { width:100%; height:100%; min-height:300px; display:flex; align-items:center; justify-content:center; font-size:64px; color:var(--coffee-pale); }
+.carousel-btn { position:absolute; top:50%; transform:translateY(-50%); width:40px; height:40px; border-radius:50%; border:none; background:rgba(0,0,0,0.08); color:var(--coffee); font-size:16px; cursor:pointer; z-index:20; transition:background 0.2s; }
+.carousel-btn:hover { background:rgba(0,0,0,0.18); }
+.carousel-btn.prev { left:8px; }
+.carousel-btn.next { right:8px; }
+.carousel-dots { position:absolute; bottom:12px; left:50%; transform:translateX(-50%); display:flex; gap:6px; z-index:20; }
+.carousel-dot { width:8px; height:8px; border-radius:50%; border:none; background:var(--coffee-pale); cursor:pointer; transition:all 0.2s; }
+.carousel-dot.active { background:var(--coffee); transform:scale(1.4); }
+
+/* ================================================================
+   管理模式
+   ================================================================ */
+.admin-badge {
+  display: none;
+  position: fixed; top: 68px; right: 20px;
+  background: var(--red); color: #fff;
+  padding: 3px 14px; border-radius: 14px;
+  font-size: 11px; font-weight: bold; z-index: 150;
+}
+body.admin-mode .admin-badge { display:block; }
+
+.edit-actions { display:none; gap:6px; margin-top:10px; }
+body.admin-mode .edit-actions { display:flex; }
+
+.admin-section-controls { display:none; gap:6px; margin-bottom:14px; }
+body.admin-mode .admin-section-controls { display:flex; }
+
+body.admin-mode .card,
+body.admin-mode .project-card,
+body.admin-mode .contact-card {
+  position:relative;
+}
+body.admin-mode .card:hover,
+body.admin-mode .project-card:hover,
+body.admin-mode .contact-card:hover {
+  outline: 2px dashed var(--matcha);
+  outline-offset: -2px;
+}
+
+/* 管理表单 */
+.admin-form-modal {
+  position:fixed; inset:0; z-index:300;
+  background:rgba(74,39,34,0.45);
+  display:flex; align-items:center; justify-content:center;
+  animation:fadeIn 0.2s ease;
+}
+.admin-form {
+  background:var(--white); border-radius:var(--radius-lg);
+  box-shadow:var(--shadow-lg);
+  max-width:540px; width:92%; max-height:85vh;
+  overflow-y:auto; padding:28px; position:relative;
+}
+.admin-form h3 { font-family:var(--font-serif); font-size:19px; color:var(--coffee-deep); margin-bottom:18px; }
+.admin-form-close {
+  position:absolute; top:10px; right:10px;
+  width:30px; height:30px; border-radius:50%;
+  border:none; background:var(--cream-dark); color:var(--coffee);
+  font-size:14px; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+}
+.form-group { margin-bottom:14px; }
+.form-group label { display:block; font-size:13px; font-weight:600; color:var(--text); margin-bottom:4px; }
+.form-input {
+  width:100%; height:38px; padding:0 10px;
+  font-size:14px; font-family:var(--font-sans);
+  border:1px solid var(--coffee-pale); border-radius:6px;
+  background:var(--white); color:var(--text);
+  outline:none; transition:border-color var(--transition);
+}
+.form-input:focus { border-color:var(--matcha); border-width:2px; padding:0 9px; }
+.form-textarea {
+  width:100%; min-height:90px; padding:8px 10px;
+  font-size:14px; font-family:var(--font-sans);
+  border:1px solid var(--coffee-pale); border-radius:6px;
+  background:var(--white); color:var(--text);
+  outline:none; resize:vertical; transition:border-color var(--transition);
+}
+.form-textarea:focus { border-color:var(--matcha); border-width:2px; padding:7px 9px; }
+.form-actions { display:flex; gap:8px; justify-content:flex-end; margin-top:18px; }
+.upload-area {
+  border:2px dashed var(--coffee-pale); border-radius:8px;
+  padding:20px; text-align:center; color:var(--text-hint);
+  cursor:pointer; transition:border-color var(--transition);
+}
+.upload-area:hover { border-color:var(--matcha); color:var(--matcha); }
+.upload-preview { width:100%; max-height:180px; object-fit:contain; margin-top:10px; border-radius:6px; }
+.add-btn { display:none; }
+body.admin-mode .add-btn { display:inline-flex; }
+
+/* ================================================================
+   动画
+   ================================================================ */
+@keyframes fadeIn { from{opacity:0;transform:translateY(12px);} to{opacity:1;transform:translateY(0);} }
+.fade-in { opacity:0; transform:translateY(16px); transition:opacity 0.5s ease, transform 0.5s ease; }
+.fade-in.visible { opacity:1; transform:translateY(0); }
+
+/* ================================================================
+   响应式
+   ================================================================ */
+@media (max-width: 768px) {
+  .navbar { padding:0 14px; }
+  .nav-links a { padding:5px 10px; font-size:12px; }
+  .hero-name { font-size:32px; }
+  .hero { padding:100px 16px 48px; }
+  .section { padding:48px 16px; }
+  .section-title { font-size:24px; }
+  .project-card.featured { grid-column: span 1; }
+  .project-grid { grid-template-columns: 1fr; }
+  .nav-right .btn span { display:none; }
+}
+@media (max-width: 480px) {
+  .nav-brand { font-size:16px; }
+  .nav-links { gap:0; }
+  .nav-links a { padding:4px 8px; font-size:11px; }
+  .hero-name { font-size:26px; }
+  .project-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- ===== 导航栏 ===== -->
+<nav class="navbar">
+  <div class="nav-brand">个人简历</div>
+  <ul class="nav-links">
+    <li><a href="#hero" class="active">首页</a></li>
+    <li><a href="#about">关于</a></li>
+    <li><a href="#projects">作品</a></li>
+    <li><a href="#experience">经历</a></li>
+    <li><a href="#skills">技能</a></li>
+    <li><a href="#contact">联系</a></li>
+  </ul>
+  <div class="nav-right">
+    <input type="text" class="form-input" id="searchInput" placeholder="🔍 搜索项目..." style="width:160px;height:32px;font-size:13px;">
+    <button class="btn btn-sm btn-outline add-btn" id="layoutBtn" title="调整布局顺序">📐 布局</button>
+    <button class="btn btn-sm btn-outline add-btn" id="themeBtn" title="主题设置">🎨 主题</button>
+    <button class="btn btn-sm btn-outline" id="adminBtn">⚙️</button>
+  </div>
+</nav>
+
+<!-- 管理模式标签 -->
+<div class="admin-badge">🔧 管理模式</div>
+
+<!-- ================================================================
+     Hero 区
+     ================================================================ -->
+<section id="hero" class="hero section-light fade-in">
+  <div class="section-inner" style="text-align:center;">
+    <div class="hero-banner" id="heroBanner">
+      <div id="heroPhoto"></div>
+      <div class="hero-name" id="heroName">---</div>
+      <div class="hero-title" id="heroTitle"></div>
+      <div class="hero-meta" id="heroMeta"></div>
+    </div>
+    <div style="margin-top:16px;">
+      <button class="btn btn-primary add-btn" id="btnEditProfile">✏️ 编辑资料</button>
+    </div>
+    <div class="hero-tags" id="heroHobbies" style="margin-top:16px;"></div>
+  </div>
+</section>
+
+<!-- ================================================================
+     作品集
+     ================================================================ -->
+<section id="projects" class="section section-light fade-in">
+  <div class="section-inner">
+    <div class="section-tag">PROJECTS</div>
+    <div class="section-title">项目作品</div>
+    <div class="section-subtitle">每个项目都是一次成长</div>
+    <div class="admin-section-controls">
+      <button class="btn btn-sm btn-outline add-btn" id="btnAddProject">➕ 添加项目</button>
+    </div>
+    <div class="filter-bar" id="filterBar"></div>
+    <div class="project-grid" id="projectGrid">
+      <p style="color:var(--text-hint);">暂无项目</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================================
+     经历
+     ================================================================ -->
+<section id="experience" class="section section-matcha fade-in">
+  <div class="section-inner">
+    <div class="section-tag">EXPERIENCE</div>
+    <div class="section-title">经历</div>
+
+    <!-- 在校经历 -->
+    <div class="card-upgrade" style="margin-bottom:20px;">
+      <h3 style="font-family:var(--font-serif);font-size:20px;color:var(--coffee);margin-bottom:4px;">🏫 在校经历</h3>
+      <div class="admin-section-controls">
+        <button class="btn btn-sm btn-outline add-btn" id="btnAddCampus">➕ 添加</button>
+      </div>
+      <div class="timeline" id="campusTimeline">
+        <p style="color:var(--text-hint);">暂无在校经历</p>
+      </div>
+    </div>
+
+    <!-- 实习经历 -->
+    <div class="card-upgrade" style="margin-bottom:20px;">
+      <h3 style="font-family:var(--font-serif);font-size:20px;color:var(--coffee);margin-bottom:4px;">💼 实习经历</h3>
+      <div class="admin-section-controls">
+        <button class="btn btn-sm btn-outline add-btn" id="btnAddIntern">➕ 添加</button>
+      </div>
+      <div class="timeline" id="internshipTimeline">
+        <p style="color:var(--text-hint);">暂无实习经历</p>
+      </div>
+    </div>
+
+    <!-- 教育背景 -->
+    <div class="card-upgrade">
+      <h3 style="font-family:var(--font-serif);font-size:20px;color:var(--coffee);margin-bottom:4px;">🎓 教育背景</h3>
+      <div class="admin-section-controls">
+        <button class="btn btn-sm btn-outline add-btn" id="btnAddEdu">➕ 添加</button>
+      </div>
+      <div class="timeline" id="educationTimeline">
+        <p style="color:var(--text-hint);">暂无教育经历</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================================
+     技能
+     ================================================================ -->
+<section id="skills" class="section section-matcha fade-in">
+  <div class="section-inner">
+    <div class="section-tag">SKILLS</div>
+    <div class="section-title">专业技能</div>
+    <div class="section-subtitle">持续学习和实践中积累的技术能力</div>
+    <div class="admin-section-controls" style="margin-bottom:16px;">
+      <button class="btn btn-sm btn-outline add-btn" id="btnAddSkill">➕ 添加技能</button>
+    </div>
+    <div class="skills-categories" id="skillsContainer">
+      <p style="color:var(--text-hint);">暂无技能数据</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================================
+     关于我
+     ================================================================ -->
+<section id="about" class="section section-light fade-in">
+  <div class="section-inner">
+    <div class="section-tag">ABOUT</div>
+    <div class="section-title">关于我</div>
+    <div class="admin-section-controls">
+      <button class="btn btn-sm btn-outline add-btn" id="btnEditAbout">✏️ 编辑关于我</button>
+    </div>
+    <div class="about-text" id="aboutText">暂无简介</div>
+    <div class="about-hobbies" id="aboutHobbies"></div>
+  </div>
+</section>
+
+<!-- ================================================================
+     联系我
+     ================================================================ -->
+<section id="contact" class="section section-matcha fade-in">
+  <div class="section-inner">
+    <div class="section-tag">CONTACT</div>
+    <div class="section-title">联系我</div>
+    <div class="admin-section-controls">
+      <button class="btn btn-sm btn-outline add-btn" id="btnEditContact">✏️ 编辑联系方式</button>
+    </div>
+    <div class="contact-cards" id="contactCards">
+      <p style="color:var(--text-hint);">暂无联系信息</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================================
+     页脚
+     ================================================================ -->
+<footer class="footer">
+  <p>© 2026 个人简历 · 求职作品集</p>
+  <p style="margin-top:8px;">
+    <button class="btn btn-sm btn-outline" id="btnExport">📥 导出备份</button>
+    <button class="btn btn-sm btn-outline" id="btnImport">📤 导入备份</button>
+  </p>
+  <p style="margin-top:8px;font-size:11px;">数据保存在浏览器中 · 建议定期导出备份</p>
+  <p style="margin-top:6px;"><button class="btn btn-sm btn-danger" id="btnReset" style="font-size:11px;">🔄 重置为默认数据</button></p>
+</footer>
+
+<input type="file" accept=".json" id="importFileInput" style="display:none;">
+
+<!-- ================================================================
+     脚本
+     ================================================================ -->
+<script>
+/* ================================================================
+   IndexedDB 数据层
+   ================================================================ */
+const DB_NAME = 'PortfolioDBv2';
+const STORE_NAME = 'userData';
+const DATA_KEY = 'main';
+
+// ---- 生成演示占位图片（Canvas 画图，兼容所有浏览器） ----
+function generateDemoImage(title, label, color, w, h) {
+  const canvas = document.createElement('canvas');
+  canvas.width = w; canvas.height = h;
+  const ctx = canvas.getContext('2d');
+  // 渐变背景
+  const grad = ctx.createLinearGradient(0, 0, w, h);
+  grad.addColorStop(0, color);
+  grad.addColorStop(1, '#3D1F18');
+  ctx.fillStyle = grad; ctx.fillRect(0, 0, w, h);
+  // 装饰圆
+  ctx.globalAlpha = 0.08;
+  for(let i=0; i<6; i++) {
+    ctx.beginPath(); ctx.arc(w*(0.2+i*0.15), h*0.45, 80, 0, Math.PI*2);
+    ctx.fillStyle = '#fff'; ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+  // 图标
+  ctx.font = '64px sans-serif'; ctx.textAlign = 'center';
+  ctx.fillStyle = 'rgba(255,255,255,0.15)'; ctx.fillText('📷', w/2, h*0.38);
+  // 标题
+  ctx.font = 'bold 26px "Microsoft YaHei", sans-serif';
+  ctx.fillStyle = 'rgba(255,255,255,0.9)'; ctx.fillText(title, w/2, h*0.55);
+  // 标签
+  ctx.font = '16px "Microsoft YaHei", sans-serif';
+  ctx.fillStyle = 'rgba(255,255,255,0.7)'; ctx.fillText(label, w/2, h*0.62);
+  // 分隔线
+  ctx.strokeStyle = 'rgba(255,255,255,0.3)'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(w/2-50, h*0.69); ctx.lineTo(w/2+50, h*0.69); ctx.stroke();
+  // 提示
+  ctx.font = '12px "Microsoft YaHei", sans-serif';
+  ctx.fillStyle = 'rgba(255,255,255,0.4)'; ctx.fillText('◀  左右滑动查看  ▶', w/2, h*0.76);
+  return canvas.toDataURL('image/jpeg', 0.92);
+}
+function generateDemoImages(title, labels) {
+  const colors = ['#6B3D2E','#7B8D6E','#8B6F5E','#A8B89A'];
+  const sizes = [[1600,900],[1600,800],[1600,1000],[1400,900]];
+  return labels.map((label, i) => {
+    const [w,h] = sizes[i % sizes.length];
+    return generateDemoImage(title, label, colors[i % colors.length], w, h);
+  });
+}
+
+function getDefaultData() {
+  return {
+    sectionOrder: ['hero','about','projects','experience','skills','contact'],
+    theme: {
+      nameFont: 'var(--font-fangsong)',
+      titleFont: 'var(--font-serif)',
+      bodyFont: 'var(--font-sans)',
+      colorScheme: 'coffee',
+      customNameFont: '',
+      customTitleFont: '',
+      customBodyFont: '',
+      nameColor: '#ffffff',
+      titleColor: 'rgba(255,255,255,0.9)',
+      textColor: '#3D2C26',
+      nameBold: true,
+      nameShadow: true
+    },
+    profile: {
+      name:'朱羿夫',
+      title:'AIGC 视频制作 · 视觉传达',
+      photo:'',
+      banner:'',
+      location:'武汉',
+      experience:'硕士在读',
+      status:'应届生 · 寻求 AIGC/视频制作岗位',
+      bio:'视觉传达硕士在读，本科为三维动画专业，具备动画影像、AIGC 视频制作与短视频运营复合背景。\n\n热爱并持续钻研 AI 内容创作工具，熟悉即梦、小云雀、Gemini、Index、剪映等工具，参与过 AI 真人短剧项目，能够完成分镜设计、提示词撰写、生图、生视频、剪辑输出等内容生产流程。\n\n具备抖音账号运营与文案策划经验，对短视频平台内容趋势、用户兴趣点和数据反馈有较强敏感度。学习自驱、沟通协作能力强，能够适应快速迭代的内容生产节奏。',
+      hobbies:['🎬 视频创作','🤖 AIGC','📹 短视频运营','🎨 视觉设计','📖 持续学习']
+    },
+    skills: [
+      { id:'sk-1', name:'Stable Diffusion', icon:'🤖', category:'AIGC 工具' },
+      { id:'sk-2', name:'Gemini', icon:'🧠', category:'AIGC 工具' },
+      { id:'sk-3', name:'小云雀 / Lovart', icon:'☁️', category:'AIGC 工具' },
+      { id:'sk-4', name:'即梦', icon:'✨', category:'AIGC 工具' },
+      { id:'sk-5', name:'可灵 / 海螺 AI', icon:'🎬', category:'AIGC 工具' },
+      { id:'sk-6', name:'Index', icon:'🎞️', category:'AIGC 工具' },
+      { id:'sk-7', name:'剪映', icon:'✂️', category:'视频制作' },
+      { id:'sk-8', name:'短视频剪辑', icon:'📹', category:'视频制作' },
+      { id:'sk-9', name:'字幕包装 / 节奏调整', icon:'🎵', category:'视频制作' },
+      { id:'sk-10', name:'AI 视频素材迭代', icon:'🔄', category:'视频制作' },
+      { id:'sk-11', name:'Photoshop', icon:'🖼️', category:'视觉设计' },
+      { id:'sk-12', name:'Adobe Illustrator', icon:'🎨', category:'视觉设计' },
+      { id:'sk-13', name:'Maya', icon:'🗿', category:'视觉设计' },
+      { id:'sk-14', name:'分镜设计 / 镜头构图', icon:'📐', category:'视觉设计' },
+      { id:'sk-15', name:'光影色彩 / 视觉风格', icon:'💡', category:'视觉设计' },
+      { id:'sk-16', name:'Office / WPS', icon:'📊', category:'办公协作' },
+      { id:'sk-17', name:'英语四级 / 普通话二甲', icon:'🗣️', category:'语言能力' }
+    ],
+    education: [
+      { id:'edu-1', school:'江汉大学', major:'视觉传达', degree:'硕士', startDate:'2025.09', endDate:'至今' },
+      { id:'edu-2', school:'吉林动画学院', major:'动画', degree:'本科', startDate:'2020.09', endDate:'2024.06' }
+    ],
+    campusExperience: [
+      {
+        id:'cam-1',
+        title:'AI 真人短剧项目',
+        organization:'AIGC 视频制作',
+        description:'参与 AI 真人短剧项目制作，完成从剧本拆解、分镜设计、AI 生图、AI 生视频、剪辑到平台上线的完整 AI 影视工作流。\n使用 Gemini 完成剧本拆解、角色关系梳理、分镜规划与提示词生成。\n基于小云雀、Lovart 平台，使用 Seedance 2.0、Nano Banana 2 进行生图、生视频与素材迭代。\n后期使用 Index、剪映完成音频处理、视频剪辑与节奏包装，实现 AI 生成素材到短剧成片的完整交付。',
+        startDate:'2026.03', endDate:'2026.05'
+      },
+      {
+        id:'cam-2',
+        title:'武汉亚心医院医生抖音运营',
+        organization:'短视频运营',
+        description:'负责两位医生抖音账号的内容运营与文案策划，参与选题规划、标题优化、脚本撰写与发布节奏调整。\n运营内容平均每三条约有一条播放量破万，单条最高播放量约 80 万。',
+        startDate:'2026.03', endDate:'2026.06'
+      },
+      {
+        id:'cam-3',
+        title:'动画《熠》',
+        organization:'项目负责人 · 三维动画制作',
+        description:'统筹 9 人团队完成三维动画项目制作，负责项目进度推进、镜头 layout、blocking 审核及画面节奏把控。\n使用 Maya、Photoshop 等工具参与动画创作，通过构图、光影、色彩与镜头调度强化视觉表现。\n最终无依靠 AI 完成五分钟三维动画，项目获得校内专业评审好评。',
+        startDate:'2023.12', endDate:'2024.06'
+      },
+      {
+        id:'cam-4',
+        title:'社区服务 PBL 项目',
+        organization:'调研策划 · 项目执行',
+        description:'参与社区服务项目，负责前期调研、活动策划、物料准备及 PBL 项目执行。提升了用户调研、内容策划与团队协作能力。',
+        startDate:'2025.12', endDate:'2026.02'
+      }
+    ],
+    internship: [
+      {
+        id:'int-1',
+        company:'中建城市建设发展有限公司',
+        position:'投标专员',
+        description:'协助完成投标文件整理、资料校对、文档排版与基础商务文件编制工作。\n熟悉规范化文档制作流程，提升了信息整理、细节校对和项目交付意识。',
+        startDate:'2024.04', endDate:'2024.07'
+      }
+    ],
+    projects: [
+      {
+        id:'proj-1',
+        name:'AI 真人短剧',
+        description:'参与 AI 真人短剧项目制作，使用 Gemini 完成剧本拆解与分镜规划，基于小云雀、Lovart 平台使用 Seedance 2.0 进行生图生视频，后期通过 Index、剪映完成剪辑与节奏包装，实现 AI 素材到成片的完整交付，作品即将在红果平台上线。',
+        images:generateDemoImages('AI 真人短剧', ['分镜设计','AI 生图','成片截图']), tags:['AIGC','Gemini','Seedance','Lovart','Index','剪映'], link:'', date:'2026.05', category:'工作项目', featured:true
+      },
+      {
+        id:'proj-2',
+        name:'动画《熠》',
+        description:'统筹 9 人团队完成五分钟三维动画短片。负责项目进度推进、镜头 layout、blocking 审核及画面节奏把控。使用 Maya、Photoshop 参与动画创作，通过构图、光影、色彩与镜头调度强化视觉表现。项目获校内专业评审好评。',
+        images:generateDemoImages('动画《熠》', ['角色设计稿','场景渲染','最终成片']), tags:['Maya','Photoshop','三维动画','分镜设计','团队统筹'], link:'', date:'2024.06', category:'个人项目', featured:true
+      },
+      {
+        id:'proj-3',
+        name:'医生抖音账号运营',
+        description:'负责两位医生抖音账号的内容运营与文案策划。选题规划、标题优化、脚本撰写与发布节奏调整。平均每三条有一条播放量破万，单条最高播放量约 80 万。',
+        images:[], tags:['抖音运营','文案策划','短视频','爆款内容'], link:'', date:'2026.06', category:'工作项目', featured:false
+      },
+      {
+        id:'proj-4',
+        name:'社区服务 PBL 项目',
+        description:'参与社区服务项目，负责前期调研、活动策划、物料准备及 PBL 项目执行。提升了用户调研、内容策划与团队协作能力。',
+        images:[], tags:['PBL','调研策划','团队协作'], link:'', date:'2026.02', category:'个人项目', featured:false
+      }
+    ],
+    contact: {
+      items: [
+        { id:'ct-1', icon:'✉️', label:'邮箱', value:'1907765881@qq.com', link:'mailto:1907765881@qq.com' },
+        { id:'ct-2', icon:'📱', label:'电话', value:'138 7230 3825', link:'' },
+        { id:'ct-3', icon:'💬', label:'微信', value:'zhuyifu_wx', link:'' }
+      ]
+    }
+  };
+}
+
+// ---- IndexedDB 操作 ----
+function openDB() {
+  return new Promise((resolve, reject) => {
+    const r = indexedDB.open(DB_NAME, 1);
+    r.onupgradeneeded = e => { if(!e.target.result.objectStoreNames.contains(STORE_NAME)) e.target.result.createObjectStore(STORE_NAME); };
+    r.onsuccess = e => resolve(e.target.result);
+    r.onerror = e => reject(e.target.error);
+  });
+}
+async function loadData() {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_NAME,'readonly');
+    const r = tx.objectStore(STORE_NAME).get(DATA_KEY);
+    r.onsuccess = () => {
+      if(r.result) resolve(r.result);
+      else { const d = getDefaultData(); saveData(d).then(() => resolve(d)); }
+    };
+    r.onerror = () => reject(r.error);
+    tx.oncomplete = () => db.close();
+  });
+}
+async function saveData(data) {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_NAME,'readwrite');
+    tx.objectStore(STORE_NAME).put(data, DATA_KEY);
+    tx.oncomplete = () => { db.close(); resolve(); };
+    tx.onerror = () => { db.close(); reject(tx.error); };
+  });
+}
+
+window.PortfolioDB = { load:loadData, save:saveData };
+
+/* ================================================================
+   全局状态
+   ================================================================ */
+let appData = null;
+let isAdminMode = false;
+let currentFilter = '全部';
+const ADMIN_PASSWORD = 'admin';
+
+/* ================================================================
+   工具函数
+   ================================================================ */
+function escapeHtml(s) { if(!s) return ''; const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
+function genId() { return 'id-'+Date.now()+'-'+Math.random().toString(36).substr(2,6); }
+function formatDate(d) { return d || ''; }
+async function saveAndRefresh() { await saveData(appData); renderAll(); }
+
+/* ================================================================
+   渲染：Hero
+   ================================================================ */
+function renderHero() {
+  const p = appData.profile;
+  document.getElementById('heroName').textContent = p.name || '未设置';
+  document.getElementById('heroTitle').textContent = p.title || '';
+
+  // 头像背景板
+  const banner = document.getElementById('heroBanner');
+  if(p.banner) banner.style.backgroundImage = `url(${p.banner})`;
+  else banner.style.backgroundImage = '';
+
+  // 照片
+  const pc = document.getElementById('heroPhoto');
+  if(p.photo) pc.innerHTML = `<img class="hero-photo" src="${p.photo}" alt="照片" title="${isAdminMode?'点击更换照片':''}">`;
+  else pc.innerHTML = `<div class="hero-photo-placeholder" title="${isAdminMode?'点击上传照片':''}">👤</div>`;
+  if(isAdminMode) {
+    pc.style.cursor = 'pointer';
+    pc.onclick = function() { uploadProfilePhoto(); };
+  } else {
+    pc.style.cursor = 'default';
+    pc.onclick = null;
+  }
+
+  // 元信息
+  const meta = document.getElementById('heroMeta');
+  let metaItems = [];
+  if(p.location) metaItems.push(`<span>📍 ${escapeHtml(p.location)}</span>`);
+  if(p.experience) metaItems.push(`<span>💼 ${escapeHtml(p.experience)}</span>`);
+  if(p.status) metaItems.push(`<span>🎯 ${escapeHtml(p.status)}</span>`);
+  meta.innerHTML = metaItems.join('');
+
+  // 内联编辑：管理模式下点击姓名/头衔/简介可编辑
+  if(isAdminMode) {
+    const nameEl = document.getElementById('heroName');
+    nameEl.style.cursor = 'pointer';
+    nameEl.title = '点击编辑姓名';
+    nameEl.onclick = function() { editProfile(); };
+
+    const titleEl = document.getElementById('heroTitle');
+    titleEl.style.cursor = 'pointer';
+    titleEl.title = '点击编辑头衔';
+    titleEl.onclick = function() { editProfile(); };
+
+    // 照片栏
+    renderPhotoBar();
+  }
+
+  // 爱好标签
+  const hc = document.getElementById('heroHobbies');
+  if(hc) hc.innerHTML = (p.hobbies||[]).map(h => `<span class="tag tag-outline">${escapeHtml(h)}</span>`).join('');
+}
+
+// 头像裁剪器
+async function uploadProfilePhoto() {
+  const overlay = document.createElement('div');
+  overlay.className = 'admin-form-modal';
+  overlay.innerHTML = `<div class="admin-form" style="max-width:500px;text-align:center;">
+    <button class="admin-form-close" id="cropClose">✕</button>
+    <h3>✂️ 裁剪头像</h3>
+    <div style="width:300px;height:300px;margin:16px auto;border-radius:50%;overflow:hidden;background:#ddd;position:relative;cursor:grab;" id="cropBox">
+      <canvas id="cropCanvas" width="300" height="300" style="display:block;width:300px;height:300px;"></canvas>
+    </div>
+    <p style="font-size:12px;color:var(--text-hint);">🖱️ 滚轮缩放 · 拖拽移动 · 圆形裁剪</p>
+    <input type="range" id="cropZoom" min="0.3" max="4" step="0.02" value="1" style="width:200px;margin:8px 0;">
+    <div class="form-actions" style="justify-content:center;">
+      <button class="btn btn-outline" id="cropUploadBtn">📷 选择图片</button>
+      <button class="btn btn-outline" id="cropCancelBtn">取消</button>
+      <button class="btn btn-primary" id="cropSaveBtn">✂️ 裁剪保存</button>
+    </div>
+  </div>`;
+  document.body.appendChild(overlay);
+
+  const box = overlay.querySelector('#cropBox');
+  const canvas = overlay.querySelector('#cropCanvas');
+  const ctx = canvas.getContext('2d');
+  const SIZE = 300;
+
+  let img = null;
+  let scale = 1, offX = 0, offY = 0;
+  let dragging = false, lastMX = 0, lastMY = 0;
+  let hasImg = false;
+
+  function redraw() {
+    ctx.clearRect(0, 0, SIZE, SIZE);
+    if(!hasImg || !img) { ctx.fillStyle = '#ddd'; ctx.fillRect(0,0,SIZE,SIZE); return; }
+    ctx.save();
+    ctx.beginPath(); ctx.arc(SIZE/2, SIZE/2, SIZE/2, 0, Math.PI*2); ctx.clip();
+    ctx.fillStyle = '#ddd'; ctx.fillRect(0,0,SIZE,SIZE);
+    ctx.drawImage(img, offX, offY, img.width * scale, img.height * scale);
+    ctx.restore();
+  }
+
+  function loadImg(src) {
+    img = new Image();
+    img.onload = function() {
+      hasImg = true;
+      const s = Math.max(SIZE / img.width, SIZE / img.height);
+      scale = s;
+      offX = (SIZE - img.width * s) / 2;
+      offY = (SIZE - img.height * s) / 2;
+      const slider = overlay.querySelector('#cropZoom');
+      if(slider) slider.value = s;
+      redraw();
+    };
+    img.src = src;
+  }
+
+  // 加载已有头像
+  if(appData.profile.photo) loadImg(appData.profile.photo);
+  else redraw();
+
+  // 滚轮
+  box.addEventListener('wheel', function(e) {
+    e.preventDefault(); e.stopPropagation();
+    if(!hasImg) return;
+    const oldS = scale;
+    scale = Math.max(0.3, Math.min(4, scale - e.deltaY * 0.003));
+    const rect = box.getBoundingClientRect();
+    const mx = e.clientX - rect.left - SIZE/2;
+    const my = e.clientY - rect.top - SIZE/2;
+    offX = mx + (offX - mx) * (scale / oldS);
+    offY = my + (offY - my) * (scale / oldS);
+    const slider = overlay.querySelector('#cropZoom');
+    if(slider) slider.value = scale;
+    redraw();
+  }, {passive:false});
+
+  // 拖拽
+  function onDown(e) {
+    if(!hasImg) return;
+    dragging = true; lastMX = e.clientX; lastMY = e.clientY;
+    box.style.cursor = 'grabbing';
+    e.preventDefault();
+  }
+  function onMove(e) {
+    if(!dragging) return;
+    offX += e.clientX - lastMX;
+    offY += e.clientY - lastMY;
+    lastMX = e.clientX; lastMY = e.clientY;
+    redraw();
+  }
+  function onUp() { dragging = false; if(box) box.style.cursor = 'grab'; }
+
+  box.addEventListener('mousedown', onDown);
+  document.addEventListener('mousemove', onMove);
+  document.addEventListener('mouseup', onUp);
+
+  // 滑块
+  overlay.querySelector('#cropZoom').addEventListener('input', function() {
+    if(!hasImg) return;
+    const oldS = scale;
+    scale = parseFloat(this.value);
+    offX = SIZE/2 + (offX - SIZE/2) * (scale / oldS);
+    offY = SIZE/2 + (offY - SIZE/2) * (scale / oldS);
+    redraw();
+  });
+
+  // 选图
+  overlay.querySelector('#cropUploadBtn').addEventListener('click', function() {
+    const inp = document.createElement('input');
+    inp.type = 'file'; inp.accept = 'image/*';
+    inp.onchange = function() {
+      if(!this.files[0]) return;
+      const r = new FileReader();
+      r.onload = function(ev) { loadImg(ev.target.result); };
+      r.readAsDataURL(this.files[0]);
+    };
+    inp.click();
+  });
+
+  // 清理
+  function cleanup() {
+    document.removeEventListener('mousemove', onMove);
+    document.removeEventListener('mouseup', onUp);
+    overlay.remove();
+  }
+
+  // 保存
+  overlay.querySelector('#cropSaveBtn').addEventListener('click', async function() {
+    if(!hasImg || !img) return;
+    const out = document.createElement('canvas');
+    out.width = SIZE; out.height = SIZE;
+    const octx = out.getContext('2d');
+    octx.beginPath(); octx.arc(SIZE/2, SIZE/2, SIZE/2, 0, Math.PI*2); octx.clip();
+    octx.drawImage(img, offX, offY, img.width * scale, img.height * scale);
+    appData.profile.photo = out.toDataURL('image/jpeg', 0.9);
+    await saveAndRefresh();
+    cleanup();
+  });
+
+  overlay.querySelector('#cropClose').addEventListener('click', cleanup);
+  overlay.querySelector('#cropCancelBtn').addEventListener('click', cleanup);
+  overlay.addEventListener('click', function(e) { if(e.target === overlay) cleanup(); });
+}
+
+// 照片栏
+function renderPhotoBar() {
+  const hero = document.getElementById('hero');
+  let bar = hero.querySelector('.photo-bar');
+  if(!bar) {
+    bar = document.createElement('div');
+    bar.className = 'photo-bar';
+    hero.appendChild(bar);
+  }
+  const photos = appData.profile.gallery || [];
+  bar.innerHTML = `<div style="text-align:center;padding:12px 0 0;">
+    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">${photos.map((img,i) => `
+      <div style="position:relative;width:100px;height:100px;border-radius:8px;overflow:hidden;border:2px solid var(--coffee-pale);">
+        <img src="${img}" style="width:100%;height:100%;object-fit:cover;cursor:pointer;" onclick="showFullscreenImage('${img}', ${JSON.stringify(photos).replace(/"/g,'&quot;')})">
+        ${isAdminMode ? `<button onclick="deleteGalleryImg(${i})" style="position:absolute;top:2px;right:2px;width:20px;height:20px;border-radius:50%;border:none;background:var(--red);color:#fff;font-size:10px;cursor:pointer;">✕</button>` : ''}
+      </div>`).join('')}
+      ${isAdminMode ? `<div class="upload-area" onclick="addGalleryImg()" style="width:100px;height:100px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:28px;color:var(--coffee-pale);">➕</div>` : ''}
+    </div>
+  </div>`;
+}
+
+async function addGalleryImg() {
+  const input = document.createElement('input');
+  input.type = 'file'; input.accept = 'image/*'; input.multiple = true;
+  input.onchange = async function() {
+    if(!appData.profile.gallery) appData.profile.gallery = [];
+    for(const f of Array.from(this.files)) {
+      appData.profile.gallery.push(await compressImage(f, 1200, 0.88));
+    }
+    await saveAndRefresh();
+  };
+  input.click();
+}
+
+async function deleteGalleryImg(idx) {
+  appData.profile.gallery.splice(idx, 1);
+  await saveAndRefresh();
+}
+
+function renderAbout() {
+  document.getElementById('aboutText').textContent = appData.profile.bio || '暂无简介';
+  document.getElementById('aboutHobbies').innerHTML = (appData.profile.hobbies||[]).map(h =>
+    `<span class="tag tag-outline">${escapeHtml(h)}</span>`
+  ).join('');
+}
+
+/* ================================================================
+   渲染：技能（按分类）
+   ================================================================ */
+function renderSkills() {
+  const container = document.getElementById('skillsContainer');
+  const skills = appData.skills || [];
+  if(!skills.length) { container.innerHTML = '<p style="color:var(--text-hint);">暂无技能数据</p>'; return; }
+  const cats = {};
+  skills.forEach(s => { const cat = s.category || '其他'; if(!cats[cat]) cats[cat] = []; cats[cat].push(s); });
+  let html = '';
+  for(const [cat, items] of Object.entries(cats)) {
+    html += `<div style="margin-bottom:20px;"><div class="skill-cat-name">${escapeHtml(cat)}</div><div style="display:flex;flex-wrap:wrap;gap:10px;">`;
+    items.forEach(s => {
+      let iconHtml = '';
+      if(s.icon) {
+        if(s.icon.startsWith('data:')) iconHtml = `<img src="${s.icon}" style="width:24px;height:24px;object-fit:contain;margin-right:4px;border-radius:4px;">`;
+        else iconHtml = `<span style="font-size:22px;margin-right:4px;">${escapeHtml(s.icon)}</span>`;
+      }
+      html += `<div class="skill-tag-card">${iconHtml}<span>${escapeHtml(s.name)}</span>`;
+      if(isAdminMode) html += `<div class="edit-actions" style="margin-top:6px;"><button class="btn btn-sm btn-outline edit-skill-btn" data-id="${s.id}">✏️</button><button class="btn btn-sm btn-danger del-skill-btn" data-id="${s.id}">🗑️</button></div>`;
+      html += '</div>';
+    });
+    html += '</div></div>';
+  }
+  container.innerHTML = html;
+}
+/* ================================================================
+   渲染：作品集
+   ================================================================ */
+function renderProjects(filterText) {
+  const grid = document.getElementById('projectGrid');
+  const filterBar = document.getElementById('filterBar');
+
+  let projects = appData.projects || [];
+  const keyword = (filterText||'').trim().toLowerCase();
+
+  // 分类筛选
+  if(currentFilter !== '全部') {
+    projects = projects.filter(p => p.category === currentFilter);
+  }
+  // 搜索
+  if(keyword) {
+    projects = projects.filter(p => p.name.toLowerCase().includes(keyword)
+      || p.description.toLowerCase().includes(keyword)
+      || (p.tags||[]).some(t => t.toLowerCase().includes(keyword)));
+  }
+
+  // 筛选栏
+  const allCats = ['全部', ...new Set((appData.projects||[]).map(p => p.category || '未分类').filter(Boolean))];
+  filterBar.innerHTML = allCats.map(c =>
+    `<span class="tag ${c === currentFilter ? 'tag-active' : ''}" data-cat="${escapeHtml(c)}">${escapeHtml(c)}</span>`
+  ).join('');
+
+  if(!projects.length) {
+    grid.innerHTML = `<p style="color:var(--text-hint);text-align:center;padding:40px;grid-column:1/-1;">${keyword ? '没有匹配的项目':'暂无项目'}</p>`;
+    return;
+  }
+
+  grid.innerHTML = projects.map((proj, idx) => {
+    const size = proj.size || 'medium';
+    const sizeClass = size === 'large' ? ' project-card-large' : (size === 'small' ? ' project-card-small' : '');
+    const coverH = size === 'large' ? '260px' : (size === 'small' ? '140px' : '200px');
+    let coverHtml;
+    if(proj.images && proj.images.length>0) coverHtml = `<img class="project-cover" src="${proj.images[0]}" alt="${escapeHtml(proj.name)}" style="height:${coverH};">`;
+    else coverHtml = `<div class="project-cover-placeholder" style="height:${coverH};">💼</div>`;
+
+    const tagsHtml = (proj.tags||[]).map(t => `<span class="tag">${escapeHtml(t)}</span>`).join('');
+    const linkHint = proj.link ? '<span class="project-link-hint">🔗 有链接</span>' : '';
+
+    return `<div class="project-card${sizeClass}" data-id="${proj.id}">
+      ${coverHtml}
+      <div class="project-body">
+        <div class="project-name">${escapeHtml(proj.name)}</div>
+        <div class="project-desc">${escapeHtml(proj.description)}</div>
+        <div class="project-tags">${tagsHtml}</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <span class="project-date">📅 ${escapeHtml(proj.date||'')}</span>
+          ${linkHint}
+        </div>
+        ${isAdminMode ? `<div class="edit-actions" style="margin-top:10px;">
+          ${idx > 0 ? `<button class="btn btn-sm btn-outline edit-proj-up-btn" data-id="${proj.id}">⬆</button>` : ''}
+          ${idx < projects.length-1 ? `<button class="btn btn-sm btn-outline edit-proj-down-btn" data-id="${proj.id}">⬇</button>` : ''}
+          <button class="btn btn-sm btn-outline edit-proj-btn" data-id="${proj.id}">✏️</button>
+          <button class="btn btn-sm btn-outline img-proj-btn" data-id="${proj.id}">📷</button>
+          <button class="btn btn-sm btn-outline size-proj-btn" data-id="${proj.id}">📐</button>
+          <button class="btn btn-sm btn-danger del-proj-btn" data-id="${proj.id}">🗑️</button>
+        </div>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+
+  // 项目卡片点击 → 详情
+  grid.querySelectorAll('.project-card').forEach(card => {
+    card.addEventListener('click', function(e) {
+      if(e.target.closest('.edit-actions') || e.target.closest('button')) return;
+      openProjectDetail(this.dataset.id);
+    });
+  });
+
+  // 筛选标签点击
+  filterBar.querySelectorAll('.tag').forEach(tag => {
+    tag.addEventListener('click', function() {
+      currentFilter = this.dataset.cat;
+      renderProjects(document.getElementById('searchInput').value);
+    });
+  });
+}
+
+/* ================================================================
+   渲染：经历
+   ================================================================ */
+function sortByDate(arr) {
+  return [...arr].sort((a,b) => {
+    const da = a.endDate || a.startDate || '';
+    const db = b.endDate || b.startDate || '';
+    if(da === '至今') return -1; if(db === '至今') return 1;
+    return db.localeCompare(da); // 倒序：最近的在前面
+  });
+}
+
+function renderTimeline(containerId, items, fields, editCls, delCls) {
+  const container = document.getElementById(containerId);
+  if(!items || !items.length) { container.innerHTML='<p style="color:var(--text-hint);">暂无</p>'; return; }
+  // 直接用数组顺序（初始已排序，手动调序后保持）
+  const list = items;
+  container.innerHTML = list.map((item, idx) => {
+    let html = `<div class="timeline-item" data-id="${item.id}">
+      <div class="timeline-date">${escapeHtml(item[fields[0]])} — ${escapeHtml(item[fields[1]])}</div>
+      <div class="timeline-title">${escapeHtml(item[fields[2]])}</div>
+      <div class="timeline-subtitle">${escapeHtml(item[fields[3]])}</div>`;
+    if(item[fields[4]]) html += `<div class="timeline-desc">${escapeHtml(item[fields[4]])}</div>`;
+    if(item.image) html += `<img src="${item.image}" style="max-width:100%;max-height:200px;border-radius:6px;margin-top:8px;cursor:pointer;" onclick="showFullscreenImage('${item.image}',['${item.image}'])">`;
+    if(isAdminMode) html += `<div class="edit-actions">
+      ${idx > 0 ? `<button class="btn btn-sm btn-outline ${editCls}-up-btn" data-id="${item.id}">⬆</button>` : ''}
+      ${idx < list.length-1 ? `<button class="btn btn-sm btn-outline ${editCls}-down-btn" data-id="${item.id}">⬇</button>` : ''}
+      <button class="btn btn-sm btn-outline ${editCls}-btn" data-id="${item.id}">✏️</button>
+      <button class="btn btn-sm btn-danger ${delCls}-btn" data-id="${item.id}">🗑️</button>
+    </div>`;
+    html += '</div>';
+    return html;
+  }).join('');
+}
+
+function renderExperience() {
+  const campus = appData.campusExperience || [];
+  renderTimeline('campusTimeline', campus,
+    ['startDate','endDate','title','organization','description'], 'edit-campus', 'del-campus');
+  const internship = appData.internship || [];
+  renderTimeline('internshipTimeline', internship,
+    ['startDate','endDate','position','company','description'], 'edit-intern', 'del-intern');
+  const edu = appData.education || [];
+  const eduContainer = document.getElementById('educationTimeline');
+  if(!edu.length) { eduContainer.innerHTML='<p style="color:var(--text-hint);">暂无</p>'; return; }
+  eduContainer.innerHTML = edu.map(e => {
+    let html = `<div class="timeline-item">
+      <div class="timeline-date">${escapeHtml(e.startDate)} — ${escapeHtml(e.endDate)}</div>
+      <div class="timeline-title">${escapeHtml(e.school)}</div>
+      <div class="timeline-subtitle">${escapeHtml(e.major)} · ${escapeHtml(e.degree)}</div>`;
+    if(isAdminMode) html += `<div class="edit-actions">
+      <button class="btn btn-sm btn-outline edit-edu-btn" data-id="${e.id}">✏️</button>
+      <button class="btn btn-sm btn-danger del-edu-btn" data-id="${e.id}">🗑️</button>
+    </div>`;
+    html += '</div>';
+    return html;
+  }).join('');
+}
+
+/* ================================================================
+   渲染：联系（被 renderHero 调用）
+   ================================================================ */
+function renderContact() {
+  const cards = document.getElementById('contactCards');
+  if(!cards) return;
+  const items = (appData.contact && appData.contact.items) ? appData.contact.items : [];
+  if(!items.length) { cards.innerHTML='<p style="color:var(--text-hint);">暂无联系信息</p>'; return; }
+  cards.innerHTML = items.map(item => {
+    const isLink = item.link && (item.link.startsWith('http')||item.link.startsWith('mailto'));
+    const tag = isLink ? 'a' : 'div';
+    let html = `<${tag} class="contact-card" ${isLink ? `href="${escapeHtml(item.link)}" target="_blank" rel="noopener"` : ''}>
+      <div class="contact-icon">${item.icon||'🔗'}</div>
+      <div><div class="contact-label">${escapeHtml(item.label)}</div><div class="contact-value">${escapeHtml(item.value)}</div></div>
+    </${tag}>`;
+    if(isAdminMode) html += `<div class="edit-actions" style="position:absolute;bottom:6px;right:8px;">
+      <button class="btn btn-sm btn-outline edit-contact-item-btn" data-id="${item.id}">✏️</button>
+      <button class="btn btn-sm btn-danger del-contact-item-btn" data-id="${item.id}">🗑️</button>
+    </div>`;
+    return html;
+  }).join('');
+}
+
+/* ================================================================
+   渲染全部
+   ================================================================ */
+function renderAll() {
+  renderHero();
+  renderSkills();
+  renderProjects(document.getElementById('searchInput')?.value || '');
+  renderExperience();
+  renderAbout();
+  renderContact();
+}
+
+/* ================================================================
+   全屏图片查看
+   ================================================================ */
+function showFullscreenImage(src, allImages) {
+  let idx = allImages.indexOf(src);
+  if(idx < 0) idx = 0;
+
+  const overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;z-index:999;background:rgba(20,12,8,0.88);overflow:hidden;';
+  overlay.innerHTML = `<button id="fsClose" style="position:absolute;top:16px;right:16px;width:40px;height:40px;border-radius:50%;border:none;background:rgba(255,255,255,0.12);color:#fff;font-size:20px;cursor:pointer;z-index:30;">✕</button>
+    <div id="fsCounter" style="position:absolute;bottom:20px;left:50%;transform:translateX(-50%);color:rgba(255,255,255,0.5);font-size:13px;z-index:30;">${idx+1} / ${allImages.length}</div>
+    <div id="fsDots" style="position:absolute;bottom:44px;left:50%;transform:translateX(-50%);display:flex;gap:8px;z-index:30;"></div>
+    <div id="fsTrack" style="position:relative;width:100%;height:100vh;"></div>`;
+
+  document.body.appendChild(overlay);
+
+  const track = overlay.querySelector('#fsTrack');
+  const dotContainer = overlay.querySelector('#fsDots');
+
+  // 创建卡片
+  allImages.forEach((img, i) => {
+    const card = document.createElement('div');
+    card.style.cssText = 'position:absolute;top:50%;left:50%;width:70%;max-width:900px;border-radius:10px;overflow:visible;cursor:pointer;transition:all 0.45s cubic-bezier(0.25,0.46,0.45,0.94);';
+    card.innerHTML = `<img src="${img}" style="width:100%;display:block;max-height:75vh;object-fit:contain;border-radius:10px;box-shadow:0 4px 40px rgba(0,0,0,0.5);">`;
+    track.appendChild(card);
+
+    const dot = document.createElement('button');
+    dot.style.cssText = 'width:8px;height:8px;border-radius:50%;border:none;background:rgba(255,255,255,0.3);cursor:pointer;transition:all 0.2s;';
+    dot.dataset.index = i;
+    dotContainer.appendChild(dot);
+  });
+
+  const cards = track.querySelectorAll('div');
+  const dots = dotContainer.querySelectorAll('button');
+  let canSwitch = true;
+
+  function updateFS() {
+    cards.forEach((card, i) => {
+      const offset = i - idx;
+      const abs = Math.abs(offset);
+      const x = offset * 28;
+      const scale = Math.max(0.45, 1 - abs * 0.2);
+      const opacity = Math.max(0.08, 1 - abs * 0.26);
+      card.style.transform = `translate(-50%,-50%) translateX(${x}%) scale(${scale})`;
+      card.style.opacity = opacity;
+      card.style.zIndex = 10 - abs;
+      card.style.pointerEvents = abs <= 2 ? 'auto' : 'none';
+    });
+    dots.forEach((d,i) => { d.classList.toggle('active', i===idx); d.style.background = i===idx ? '#fff' : 'rgba(255,255,255,0.3)'; });
+    overlay.querySelector('#fsCounter').textContent = `${idx+1} / ${allImages.length}`;
+  }
+  updateFS();
+
+  // 悬浮切换
+  cards.forEach((card, i) => {
+    card.addEventListener('mouseenter', () => {
+      if(!canSwitch || i===idx) return;
+      canSwitch = false; idx = i; updateFS();
+      setTimeout(()=> canSwitch=true, 350);
+    });
+  });
+
+  // 滚轮
+  overlay.addEventListener('wheel', e => {
+    e.preventDefault();
+    if(allImages.length <= 1) return;
+    if(e.deltaY > 0) idx = (idx+1) % allImages.length;
+    else idx = (idx-1+allImages.length) % allImages.length;
+    updateFS();
+  }, {passive:false});
+
+  // 键盘
+  function keyH(e) {
+    if(e.key==='Escape') close();
+    if(e.key==='ArrowRight'){ idx=(idx+1)%allImages.length; updateFS(); }
+    if(e.key==='ArrowLeft'){ idx=(idx-1+allImages.length)%allImages.length; updateFS(); }
+  }
+  document.addEventListener('keydown', keyH);
+
+  function close() {
+    overlay.remove();
+    document.removeEventListener('keydown', keyH);
+  }
+  overlay.querySelector('#fsClose').addEventListener('click', e => { e.stopPropagation(); close(); });
+}
+
+/* ================================================================
+   项目详情弹窗
+   ================================================================ */
+function openProjectDetail(id) {
+  const proj = (appData.projects||[]).find(p => p.id === id);
+  if(!proj) return;
+  const existing = document.querySelector('.modal-overlay');
+  if(existing) existing.remove();
+
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+
+  const hasImages = proj.images && proj.images.length>0;
+  const imgs = proj.images || [];
+  let carouselHtml;
+  if(hasImages) {
+    const imgCards = imgs.map((img,i) => `<div class="carousel-card" data-index="${i}" style="opacity:0;pointer-events:none;"><img src="${img}" alt="${escapeHtml(proj.name)} 图${i+1}"></div>`).join('');
+    const dotsHtml = imgs.map((_,i) => `<button class="carousel-dot${i===0?' active':''}" data-index="${i}"></button>`).join('');
+    carouselHtml = `<div class="carousel">
+      <div class="carousel-track" id="carouselTrack">
+        ${imgCards}
+      </div>
+      ${imgs.length>1 ? `
+        <button class="carousel-btn prev" id="carouselPrev">◀</button>
+        <button class="carousel-btn next" id="carouselNext">▶</button>
+        <div class="carousel-dots" id="carouselDots">${dotsHtml}</div>
+      ` : ''}
+    </div>`;
+  } else {
+    carouselHtml = `<div class="carousel"><div class="carousel-placeholder">💼</div></div>`;
+  }
+
+  overlay.innerHTML = `<div class="modal">
+    <button class="modal-close" id="modalClose">✕</button>
+    ${carouselHtml}
+    <div class="modal-title">${escapeHtml(proj.name)}</div>
+    <div class="tag-group" style="margin-bottom:12px;">${(proj.tags||[]).map(t=>`<span class="tag">${escapeHtml(t)}</span>`).join('')}</div>
+    <p style="font-size:14px;color:var(--text-secondary);line-height:1.8;white-space:pre-line;">${escapeHtml(proj.description)}</p>
+    ${proj.date ? `<p style="margin-top:10px;font-size:12px;color:var(--text-hint);">📅 ${escapeHtml(proj.date)}</p>` : ''}
+    ${proj.link ? `<p style="margin-top:8px;">🔗 <a href="${escapeHtml(proj.link)}" target="_blank" rel="noopener" style="color:var(--matcha);">${escapeHtml(proj.link)}</a></p>` : ''}
+  </div>`;
+  document.body.appendChild(overlay);
+
+  overlay.querySelector('#modalClose').addEventListener('click', ()=>overlay.remove());
+  overlay.addEventListener('click', e => { if(e.target===overlay) overlay.remove(); });
+  document.addEventListener('keydown', function escHandler(e) { if(e.key==='Escape'){ overlay.remove(); document.removeEventListener('keydown',escHandler); } });
+
+  // Apple Cover Flow 轮播
+  if(hasImages && imgs.length >= 1) {
+    let currentIdx = 0;
+    const cards = overlay.querySelectorAll('.carousel-card');
+    const dots = overlay.querySelectorAll('.carousel-dot');
+    let canSwitch = true;
+
+    function updateCoverFlow() {
+      cards.forEach((card, i) => {
+        const offset = i - currentIdx; // 相对中心的距离
+        const absOffset = Math.abs(offset);
+
+        // 左右各2张可见，间距紧凑
+        const xShift = offset * 24; // 每张偏移 24%
+        const scale = Math.max(0.5, 1 - absOffset * 0.18);
+        const opacity = Math.max(0.15, 1 - absOffset * 0.22);
+        const zIndex = 10 - absOffset;
+
+        card.style.transform = `translate(-50%, -50%) translateX(${xShift}%) scale(${scale})`;
+        card.style.opacity = opacity;
+        card.style.zIndex = zIndex;
+        card.style.pointerEvents = absOffset <= 3 ? 'auto' : 'none';
+      });
+      dots.forEach((d,i) => d.classList.toggle('active', i===currentIdx));
+    }
+
+    updateCoverFlow();
+
+    // 悬浮切换 + 点击放大
+    cards.forEach((card, i) => {
+      card.addEventListener('mouseenter', function() {
+        if(!canSwitch || i === currentIdx) return;
+        canSwitch = false;
+        currentIdx = i;
+        updateCoverFlow();
+        setTimeout(()=>{ canSwitch = true; }, 400);
+      });
+      // 点击中间图 → 全屏放大
+      card.addEventListener('click', function(e) {
+        if(i !== currentIdx) return; // 只有当前图响应点击
+        e.stopPropagation();
+        showFullscreenImage(imgs[currentIdx], imgs);
+      });
+    });
+
+    // ◀ ▶ 按钮
+    overlay.querySelector('#carouselPrev').addEventListener('click', ()=>{
+      currentIdx = (currentIdx - 1 + imgs.length) % imgs.length;
+      updateCoverFlow();
+    });
+    overlay.querySelector('#carouselNext').addEventListener('click', ()=>{
+      currentIdx = (currentIdx + 1) % imgs.length;
+      updateCoverFlow();
+    });
+    // 圆点
+    dots.forEach(dot => {
+      dot.addEventListener('click', function(){
+        currentIdx = parseInt(this.dataset.index);
+        updateCoverFlow();
+      });
+    });
+  }
+}
+
+/* ================================================================
+   表单弹窗
+   ================================================================ */
+function compressImage(file, maxW, quality) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const img = new Image();
+      img.onload = () => {
+        let w=img.width, h=img.height;
+        if(w>maxW){ h=Math.round(h*maxW/w); w=maxW; }
+        const c=document.createElement('canvas'); c.width=w; c.height=h;
+        c.getContext('2d').drawImage(img,0,0,w,h);
+        resolve(c.toDataURL('image/jpeg',quality));
+      };
+      img.src = e.target.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+function showFormModal(title, fields, onSubmit) {
+  const existing = document.querySelector('.admin-form-modal');
+  if(existing) existing.remove();
+
+  const overlay = document.createElement('div');
+  overlay.className = 'admin-form-modal';
+
+  let fieldsHtml = fields.map(f => {
+    if(f.type==='textarea') return `<div class="form-group"><label>${f.label}</label><textarea class="form-textarea" id="field_${f.key}" placeholder="${f.placeholder||''}">${escapeHtml(f.value||'')}</textarea></div>`;
+    if(f.type==='image') return `<div class="form-group"><label>${f.label}</label><div class="upload-area" id="field_${f.key}_area"><span>📷 点击上传（自动压缩）</span><input type="file" accept="image/*" id="field_${f.key}_input" style="display:none;">${f.value?`<img class="upload-preview" src="${f.value}" alt="预览">`:''}</div></div>`;
+    if(f.type==='tags') return `<div class="form-group"><label>${f.label}</label><input class="form-input" id="field_${f.key}" placeholder="${f.placeholder||'逗号分隔'}" value="${escapeHtml((f.value||[]).join(', '))}"></div>`;
+    return `<div class="form-group"><label>${f.label}</label><input class="form-input" id="field_${f.key}" placeholder="${f.placeholder||''}" value="${escapeHtml(f.value||'')}"></div>`;
+  }).join('');
+
+  overlay.innerHTML = `<div class="admin-form">
+    <button class="admin-form-close" id="afClose">✕</button>
+    <h3>${title}</h3>${fieldsHtml}
+    <div class="form-actions">
+      <button class="btn btn-outline" id="afCancel">取消</button>
+      <button class="btn btn-primary" id="afSave">💾 保存</button>
+    </div>
+  </div>`;
+  document.body.appendChild(overlay);
+
+  function close(){ overlay.remove(); }
+  overlay.querySelector('#afClose').addEventListener('click',close);
+  overlay.querySelector('#afCancel').addEventListener('click',close);
+  overlay.addEventListener('click',e=>{ if(e.target===overlay) close(); });
+
+  fields.filter(f=>f.type==='image').forEach(f=>{
+    const area = overlay.querySelector('#field_'+f.key+'_area');
+    const input = overlay.querySelector('#field_'+f.key+'_input');
+    area.addEventListener('click',()=>input.click());
+    input.addEventListener('change',async function(){
+      if(!this.files[0]) return;
+      const b64 = await compressImage(this.files[0], 800, 0.7);
+      f._uploaded = b64;
+      const prev = area.querySelector('.upload-preview');
+      if(prev) prev.src = b64;
+      else { const img=document.createElement('img'); img.className='upload-preview'; img.src=b64; area.appendChild(img); }
+    });
+  });
+
+  overlay.querySelector('#afSave').addEventListener('click',()=>{
+    const vals = {};
+    fields.forEach(f => {
+      if(f.type==='image') vals[f.key] = f._uploaded || f.value || '';
+      else if(f.type==='tags') vals[f.key] = overlay.querySelector('#field_'+f.key).value.split(/[,，]/).map(s=>s.trim()).filter(Boolean);
+      else vals[f.key] = overlay.querySelector('#field_'+f.key).value;
+    });
+    close();
+    onSubmit(vals);
+  });
+
+  document.addEventListener('keydown', function escH(e){ if(e.key==='Escape'){ close(); document.removeEventListener('keydown',escH); } });
+}
+
+/* ================================================================
+   编辑函数
+   ================================================================ */
+function editProfile() {
+  showFormModal('编辑个人资料', [
+    { key:'name', label:'姓名', value:appData.profile.name },
+    { key:'title', label:'求职意向/头衔', value:appData.profile.title },
+    { key:'photo', label:'个人照片', type:'image', value:appData.profile.photo },
+    { key:'banner', label:'头像背景板（可选，建议 700×300）', type:'image', value:appData.profile.banner||'' },
+    { key:'location', label:'所在地', value:appData.profile.location||'' },
+    { key:'experience', label:'工作年限/学历', value:appData.profile.experience||'' },
+    { key:'status', label:'求职状态', value:appData.profile.status||'' },
+    { key:'bio', label:'个人简介', type:'textarea', value:appData.profile.bio },
+    { key:'hobbies', label:'爱好（逗号分隔）', type:'tags', value:appData.profile.hobbies||[] },
+  ], vals => {
+    appData.profile.name = vals.name;
+    appData.profile.title = vals.title;
+    appData.profile.photo = vals.photo;
+    appData.profile.banner = vals.banner;
+    appData.profile.location = vals.location;
+    appData.profile.experience = vals.experience;
+    appData.profile.status = vals.status;
+    appData.profile.bio = vals.bio;
+    appData.profile.hobbies = vals.hobbies;
+    saveAndRefresh();
+  });
+}
+
+function editSkill(id) {
+  const idx = appData.skills.findIndex(s=>s.id===id);
+  const sk = idx>=0 ? appData.skills[idx] : {};
+  const currentIcon = sk.icon || '';
+  const isImgIcon = currentIcon && currentIcon.startsWith('data:');
+
+  const overlay = document.createElement('div');
+  overlay.className = 'admin-form-modal';
+  overlay.innerHTML = `<div class="admin-form">
+    <button class="admin-form-close" id="skClose">✕</button>
+    <h3>${idx>=0?'编辑技能':'添加技能'}</h3>
+    <div class="form-group"><label>图标</label>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <div id="skIconPreview" style="width:48px;height:48px;border-radius:10px;border:2px dashed var(--coffee-pale);display:flex;align-items:center;justify-content:center;font-size:${isImgIcon?'0':'28px'};overflow:hidden;background:var(--cream-dark);">${isImgIcon ? `<img src="${currentIcon}" style="width:100%;height:100%;object-fit:cover;">` : (currentIcon||'📷')}</div>
+        <div>
+          <input class="form-input" id="skIconText" placeholder="输入 emoji 如 🤖" value="${isImgIcon?'':currentIcon}" style="width:160px;margin-bottom:4px;">
+          <button class="btn btn-sm btn-outline" id="skIconUpload">📷 上传图片</button>
+        </div>
+      </div>
+    </div>
+    <div class="form-group"><label>技能名称</label><input class="form-input" id="skName" value="${escapeHtml(sk.name||'')}"></div>
+    <div class="form-group"><label>分类</label><input class="form-input" id="skCat" value="${escapeHtml(sk.category||'')}"></div>
+    <div class="form-actions">
+      <button class="btn btn-outline" id="skCancel">取消</button>
+      <button class="btn btn-primary" id="skSave">💾 保存</button>
+    </div>
+  </div>`;
+  document.body.appendChild(overlay);
+
+  let iconData = currentIcon;
+
+  function updatePreview() {
+    const preview = overlay.querySelector('#skIconPreview');
+    if(iconData.startsWith('data:')) {
+      preview.innerHTML = `<img src="${iconData}" style="width:100%;height:100%;object-fit:cover;">`;
+      preview.style.fontSize = '0';
+    } else {
+      preview.innerHTML = iconData || '📷';
+      preview.style.fontSize = '28px';
+    }
+  }
+
+  overlay.querySelector('#skIconUpload').addEventListener('click', () => {
+    const inp = document.createElement('input');
+    inp.type = 'file'; inp.accept = 'image/*';
+    inp.onchange = async function() {
+      if(!this.files[0]) return;
+      iconData = await compressImage(this.files[0], 120, 0.8);
+      overlay.querySelector('#skIconText').value = '';
+      updatePreview();
+    };
+    inp.click();
+  });
+
+  overlay.querySelector('#skIconText').addEventListener('input', function() {
+    if(this.value) { iconData = this.value; updatePreview(); }
+  });
+
+  function close(){ overlay.remove(); }
+  overlay.querySelector('#skClose').addEventListener('click',close);
+  overlay.querySelector('#skCancel').addEventListener('click',close);
+  overlay.addEventListener('click',e=>{ if(e.target===overlay) close(); });
+
+  overlay.querySelector('#skSave').addEventListener('click', () => {
+    const updated = {
+      icon: iconData,
+      name: overlay.querySelector('#skName').value,
+      category: overlay.querySelector('#skCat').value
+    };
+    if(idx>=0) Object.assign(appData.skills[idx], updated);
+    else appData.skills.push({id:genId(),...updated});
+    close();
+    saveAndRefresh();
+  });
+}
+function deleteSkill(id) { if(!confirm('确定删除？'))return; appData.skills=appData.skills.filter(s=>s.id!==id); saveAndRefresh(); }
+
+function editContactSimple() {
+  if(!appData.contact.items) appData.contact.items = [];
+  const overlay = document.createElement('div');
+  overlay.className = 'admin-form-modal';
+  function buildList() {
+    const items = appData.contact.items;
+    return items.length === 0
+      ? '<p style="color:var(--text-hint);text-align:center;padding:12px;">暂无联系方式</p>'
+      : items.map((item, i) => `<div style="display:flex;align-items:center;gap:10px;padding:8px 12px;margin-bottom:6px;background:var(--cream-dark);border-radius:8px;">
+        <span style="font-size:22px;">${item.icon||'🔗'}</span>
+        <div style="flex:1;"><div style="font-weight:600;font-size:14px;">${escapeHtml(item.label)}</div><div style="font-size:12px;color:var(--text-hint);">${escapeHtml(item.value)}</div></div>
+        <button class="btn btn-sm btn-outline edit-contact-edit-btn" data-idx="${i}">✏️</button>
+        <button class="btn btn-sm btn-danger edit-contact-del-btn" data-idx="${i}">🗑️</button>
+      </div>`).join('');
+  }
+  overlay.innerHTML = `<div class="admin-form" style="max-width:500px;">
+    <button class="admin-form-close" id="ctClose">✕</button>
+    <h3>✏️ 编辑联系方式</h3>
+    <div id="ctList" style="max-height:360px;overflow-y:auto;margin-bottom:12px;">${buildList()}</div>
+    <div class="form-actions" style="justify-content:space-between;">
+      <button class="btn btn-outline" id="ctAdd">➕ 添加</button>
+      <button class="btn btn-outline" id="ctCancel">取消</button>
+      <button class="btn btn-primary" id="ctDone">完成</button>
+    </div>
+  </div>`;
+  document.body.appendChild(overlay);
+
+  function close(){ overlay.remove(); renderAll(); }
+  overlay.querySelector('#ctClose').addEventListener('click',close);
+  overlay.querySelector('#ctCancel').addEventListener('click',close);
+  overlay.querySelector('#ctDone').addEventListener('click',close);
+  overlay.addEventListener('click',e=>{ if(e.target===overlay) close(); });
+
+  // 编辑单条
+  overlay.querySelectorAll('.edit-contact-edit-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const idx = parseInt(this.dataset.idx);
+      const item = appData.contact.items[idx];
+      showFormModal('编辑联系方式', [
+        { key:'icon', label:'图标(emoji)', value:item.icon||'🔗' },
+        { key:'label', label:'名称（如：邮箱、微信、GitHub）', value:item.label||'' },
+        { key:'value', label:'账号/地址', value:item.value||'' },
+        { key:'link', label:'链接（可选，如 mailto:xxx 或 https://...）', value:item.link||'' },
+      ], vals => {
+        Object.assign(appData.contact.items[idx], vals);
+        saveAndRefresh();
+        overlay.remove();
+        editContactSimple();
+      });
+    });
+  });
+
+  // 删除
+  overlay.querySelectorAll('.edit-contact-del-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      if(!confirm('确定删除？')) return;
+      appData.contact.items.splice(parseInt(this.dataset.idx), 1);
+      saveAndRefresh();
+      overlay.remove();
+      editContactSimple();
+    });
+  });
+
+  // 添加
+  overlay.querySelector('#ctAdd').addEventListener('click', () => {
+    showFormModal('添加联系方式', [
+      { key:'icon', label:'图标(emoji)', value:'🔗' },
+      { key:'label', label:'名称（如：邮箱、微信、GitHub）', value:'' },
+      { key:'value', label:'账号/地址', value:'' },
+      { key:'link', label:'链接（可选）', value:'' },
+    ], vals => {
+      appData.contact.items.push({ id:genId(), ...vals });
+      saveAndRefresh();
+      overlay.remove();
+      editContactSimple();
+    });
+  });
+}
+
+function editCampusExperience(id) {
+  const arr = appData.campusExperience || [];
+  const idx = arr.findIndex(e=>e.id===id);
+  const item = idx>=0 ? arr[idx] : {};
+  showFormModal(idx>=0?'编辑在校经历':'添加在校经历', [
+    { key:'title', label:'项目/活动名称', value:item.title||'' },
+    { key:'organization', label:'角色/组织', value:item.organization||'' },
+    { key:'description', label:'详细描述', type:'textarea', value:item.description||'' },
+    { key:'startDate', label:'开始时间', value:item.startDate||'' },
+    { key:'endDate', label:'结束时间', value:item.endDate||'' },
+    { key:'image', label:'展示图片（可选）', type:'image', value:item.image||'' },
+  ], vals => {
+    if(idx>=0) Object.assign(arr[idx], vals);
+    else arr.push({id:genId(),...vals,image:''});
+    if(!appData.campusExperience) appData.campusExperience = arr;
+    saveAndRefresh();
+  });
+}
+function deleteCampusExperience(id) { if(!confirm('确定删除？'))return; appData.campusExperience=(appData.campusExperience||[]).filter(e=>e.id!==id); saveAndRefresh(); }
+function moveCampusUp(id) { swapAdjacent(appData.campusExperience, id, -1); saveAndRefresh(); }
+function moveCampusDown(id) { swapAdjacent(appData.campusExperience, id, 1); saveAndRefresh(); }
+
+function deleteInternship(id) { if(!confirm('确定删除？'))return; appData.internship=(appData.internship||[]).filter(e=>e.id!==id); saveAndRefresh(); }
+function moveInternUp(id) { swapAdjacent(appData.internship, id, -1); saveAndRefresh(); }
+function moveInternDown(id) { swapAdjacent(appData.internship, id, 1); saveAndRefresh(); }
+
+function deleteEducation(id) { if(!confirm('确定删除？'))return; appData.education=(appData.education||[]).filter(e=>e.id!==id); saveAndRefresh(); }
+function moveEduUp(id) { swapAdjacent(appData.education, id, -1); saveAndRefresh(); }
+function moveEduDown(id) { swapAdjacent(appData.education, id, 1); saveAndRefresh(); }
+
+function swapAdjacent(arr, id, dir) {
+  if(!arr) return;
+  const idx = arr.findIndex(e=>e.id===id);
+  if(idx<0 || idx+dir<0 || idx+dir>=arr.length) return;
+  [arr[idx], arr[idx+dir]] = [arr[idx+dir], arr[idx]];
+}
+
+function editInternship(id) {
+  const arr = appData.internship || [];
+  const idx = arr.findIndex(e=>e.id===id);
+  const item = idx>=0 ? arr[idx] : {};
+  showFormModal(idx>=0?'编辑实习经历':'添加实习经历', [
+    { key:'company', label:'公司名称', value:item.company||'' },
+    { key:'position', label:'职位', value:item.position||'' },
+    { key:'description', label:'职责描述', type:'textarea', value:item.description||'' },
+    { key:'startDate', label:'开始时间', value:item.startDate||'' },
+    { key:'endDate', label:'结束时间', value:item.endDate||'' },
+    { key:'image', label:'展示图片（可选）', type:'image', value:item.image||'' },
+  ], vals => {
+    if(idx>=0) Object.assign(arr[idx], vals);
+    else arr.push({id:genId(),...vals,image:''});
+    if(!appData.internship) appData.internship = arr;
+    saveAndRefresh();
+  });
+}
+function deleteInternship(id) { if(!confirm('确定删除？'))return; appData.internship=(appData.internship||[]).filter(e=>e.id!==id); saveAndRefresh(); }
+
+function deleteExperience(id) { if(!confirm('确定删除？'))return; appData.experience=(appData.experience||[]).filter(e=>e.id!==id); saveAndRefresh(); }
+
+function editEducation(id) {
+  const idx = appData.education.findIndex(e=>e.id===id);
+  const edu = idx>=0 ? appData.education[idx] : {};
+  showFormModal(idx>=0?'编辑教育经历':'添加教育经历', [
+    { key:'school', label:'学校名称', value:edu.school||'' },
+    { key:'major', label:'专业', value:edu.major||'' },
+    { key:'degree', label:'学历', value:edu.degree||'' },
+    { key:'startDate', label:'开始时间', value:edu.startDate||'' },
+    { key:'endDate', label:'结束时间', value:edu.endDate||'' },
+  ], vals => {
+    if(idx>=0) Object.assign(appData.education[idx], vals);
+    else appData.education.push({id:genId(),...vals});
+    saveAndRefresh();
+  });
+}
+function deleteEducation(id) { if(!confirm('确定删除？'))return; appData.education=appData.education.filter(e=>e.id!==id); saveAndRefresh(); }
+
+function editProject(id) {
+  const idx = appData.projects.findIndex(p=>p.id===id);
+  const proj = idx>=0 ? appData.projects[idx] : {};
+  const images = proj.images || [];
+  // 用自定义弹窗，因为需要多图上传
+  const overlay = document.createElement('div');
+  overlay.className = 'admin-form-modal';
+  overlay.innerHTML = `<div class="admin-form">
+    <button class="admin-form-close" id="afClose">✕</button>
+    <h3>${idx>=0?'编辑项目':'添加项目'}</h3>
+    <div class="form-group"><label>项目名称</label><input class="form-input" id="af_name" value="${escapeHtml(proj.name||'')}"></div>
+    <div class="form-group"><label>项目描述</label><textarea class="form-textarea" id="af_desc">${escapeHtml(proj.description||'')}</textarea></div>
+    <div class="form-group"><label>项目分类</label><input class="form-input" id="af_cat" value="${escapeHtml(proj.category||'')}" placeholder="如：工作项目 / 个人项目"></div>
+    <div class="form-group"><label>技术标签（逗号分隔）</label><input class="form-input" id="af_tags" value="${escapeHtml((proj.tags||[]).join(', '))}"></div>
+    <div class="form-group"><label>项目链接（可选）</label><input class="form-input" id="af_link" value="${escapeHtml(proj.link||'')}"></div>
+    <div class="form-group"><label>项目时间</label><input class="form-input" id="af_date" value="${escapeHtml(proj.date||'')}"></div>
+    <div class="form-group">
+      <label>项目图片</label>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;" id="af_imgPreview">
+        ${images.map((img,i)=>`<div style="position:relative;width:80px;height:80px;border-radius:6px;overflow:hidden;border:1px solid var(--coffee-pale);">
+          <img src="${img}" style="width:100%;height:100%;object-fit:cover;">
+          <button data-idx="${i}" class="af-img-del-btn" style="position:absolute;top:1px;right:1px;width:18px;height:18px;border-radius:50%;border:none;background:var(--red);color:#fff;font-size:10px;cursor:pointer;">✕</button>
+        </div>`).join('')}
+      </div>
+      <div class="upload-area" id="af_uploadBtn"><span>📷 点击上传图片（可多选，自动压缩）</span><input type="file" accept="image/*" id="af_uploadInput" style="display:none;" multiple></div>
+      <div id="af_uploadMsg" style="font-size:12px;color:var(--text-hint);margin-top:4px;"></div>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-outline" id="afCancel">取消</button>
+      <button class="btn btn-primary" id="afSave">💾 保存</button>
+    </div>
+  </div>`;
+  document.body.appendChild(overlay);
+
+  // 当前图片列表
+  let currentImages = [...images];
+
+  function close(){ overlay.remove(); }
+  overlay.querySelector('#afClose').addEventListener('click',close);
+  overlay.querySelector('#afCancel').addEventListener('click',close);
+  overlay.addEventListener('click',e=>{ if(e.target===overlay) close(); });
+
+  // 刷新图片预览（就地更新，不重开弹窗）
+  function refreshProjectImgPreview() {
+    const preview = overlay.querySelector('#af_imgPreview');
+    preview.innerHTML = currentImages.map((img,i)=>`<div style="position:relative;width:80px;height:80px;border-radius:6px;overflow:hidden;border:1px solid var(--coffee-pale);">
+      <img src="${img}" style="width:100%;height:100%;object-fit:cover;">
+      <button data-idx="${i}" class="af-img-del-btn" style="position:absolute;top:1px;right:1px;width:18px;height:18px;border-radius:50%;border:none;background:var(--red);color:#fff;font-size:10px;cursor:pointer;">✕</button>
+    </div>`).join('');
+    preview.querySelectorAll('.af-img-del-btn').forEach(btn=>{
+      btn.addEventListener('click',function(){
+        currentImages.splice(parseInt(this.dataset.idx),1);
+        refreshProjectImgPreview();
+      });
+    });
+  }
+
+  // 删除已有图片
+  overlay.querySelectorAll('.af-img-del-btn').forEach(btn=>{
+    btn.addEventListener('click',function(){
+      currentImages.splice(parseInt(this.dataset.idx),1);
+      refreshProjectImgPreview();
+    });
+  });
+
+  // 上传新图片
+  const uploadInput = overlay.querySelector('#af_uploadInput');
+  overlay.querySelector('#af_uploadBtn').addEventListener('click',()=>uploadInput.click());
+  uploadInput.addEventListener('change',async function(){
+    const files = Array.from(this.files);
+    overlay.querySelector('#af_uploadMsg').textContent = '压缩中...';
+    for(const f of files) {
+      currentImages.push(await compressImage(f, 2400, 0.92));
+    }
+    overlay.querySelector('#af_uploadMsg').textContent = '✅ 已添加 '+files.length+' 张';
+    refreshProjectImgPreview();
+    this.value = '';
+  });
+
+  // 保存
+  overlay.querySelector('#afSave').addEventListener('click',()=>{
+    const vals = {
+      name: overlay.querySelector('#af_name').value,
+      description: overlay.querySelector('#af_desc').value,
+      category: overlay.querySelector('#af_cat').value,
+      tags: overlay.querySelector('#af_tags').value.split(/[,，]/).map(s=>s.trim()).filter(Boolean),
+      link: overlay.querySelector('#af_link').value,
+      date: overlay.querySelector('#af_date').value,
+      images: currentImages
+    };
+    if(idx>=0) Object.assign(appData.projects[idx], {...vals, featured:appData.projects[idx].featured||false});
+    else appData.projects.push({id:genId(),...vals,featured:false});
+    close();
+    saveAndRefresh();
+  });
+}
+function deleteProject(id) { if(!confirm('确定删除？'))return; appData.projects=appData.projects.filter(p=>p.id!==id); saveAndRefresh(); }
+function toggleProjectSize(id) {
+  const proj = appData.projects.find(p=>p.id===id);
+  if(!proj) return;
+  const sizes = ['small','medium','large'];
+  const idx = sizes.indexOf(proj.size||'medium');
+  proj.size = sizes[(idx+1)%3];
+  saveAndRefresh();
+}
+function moveProjectUp(id) { swapAdjacent(appData.projects, id, -1); saveAndRefresh(); }
+function moveProjectDown(id) { swapAdjacent(appData.projects, id, 1); saveAndRefresh(); }
+
+function manageProjectImages(pid) {
+  const proj = appData.projects.find(p=>p.id===pid);
+  if(!proj) return;
+  const overlay = document.createElement('div');
+  overlay.className = 'admin-form-modal';
+  overlay.innerHTML = `<div class="admin-form">
+    <button class="admin-form-close" id="imgClose">✕</button>
+    <h3>📷 管理图片 — ${escapeHtml(proj.name)}</h3>
+    <div id="imgMgrList" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;">${(proj.images||[]).map((img,i)=>`
+      <div style="position:relative;width:90px;height:90px;border-radius:8px;overflow:hidden;">
+        <img src="${img}" style="width:100%;height:100%;object-fit:cover;">
+        <button data-idx="${i}" class="img-del-btn" style="position:absolute;top:2px;right:2px;width:20px;height:20px;border-radius:50%;border:none;background:var(--red);color:#fff;font-size:10px;cursor:pointer;">✕</button>
+      </div>`).join('')}${(proj.images||[]).length===0?'<p style="color:var(--text-hint);">暂无图片</p>':''}</div>
+    <div class="upload-area" id="imgUploadArea"><span>📷 点击上传新图片</span><input type="file" accept="image/*" id="imgUploadInput" style="display:none;" multiple></div>
+    <div id="imgProgress" style="margin-top:8px;font-size:12px;color:var(--text-hint);"></div>
+    <div class="form-actions"><button class="btn btn-outline" id="imgDone">完成</button></div>
+  </div>`;
+  document.body.appendChild(overlay);
+
+  function close(){ overlay.remove(); renderAll(); }
+  overlay.querySelector('#imgClose').addEventListener('click',close);
+  overlay.querySelector('#imgDone').addEventListener('click',close);
+  overlay.addEventListener('click',e=>{ if(e.target===overlay) close(); });
+
+  // 删除图片 — 就地更新，不关弹窗
+  function refreshImageList() {
+    const list = overlay.querySelector('#imgMgrList');
+    if(!list) return;
+    const imgs = proj.images || [];
+    list.innerHTML = imgs.length === 0
+      ? '<p style="color:var(--text-hint);">暂无图片</p>'
+      : imgs.map((img,i) => `<div style="position:relative;width:90px;height:90px;border-radius:8px;overflow:hidden;">
+          <img src="${img}" style="width:100%;height:100%;object-fit:cover;">
+          <button data-idx="${i}" class="img-del-btn" style="position:absolute;top:2px;right:2px;width:20px;height:20px;border-radius:50%;border:none;background:var(--red);color:#fff;font-size:10px;cursor:pointer;">✕</button>
+        </div>`).join('');
+    // 重新绑定删除按钮
+    list.querySelectorAll('.img-del-btn').forEach(btn=>{
+      btn.addEventListener('click',async function(){
+        proj.images.splice(parseInt(this.dataset.idx),1);
+        await saveData(appData);
+        refreshImageList();
+      });
+    });
+  }
+
+  overlay.querySelectorAll('.img-del-btn').forEach(btn=>{
+    btn.addEventListener('click',async function(){
+      proj.images.splice(parseInt(this.dataset.idx),1);
+      await saveData(appData);
+      refreshImageList();
+    });
+  });
+
+  const uploadInput = overlay.querySelector('#imgUploadInput');
+  overlay.querySelector('#imgUploadArea').addEventListener('click',()=>uploadInput.click());
+  uploadInput.addEventListener('change',async function(){
+    const files = Array.from(this.files);
+    overlay.querySelector('#imgProgress').textContent = `压缩中...`;
+    for(const f of files) { proj.images.push(await compressImage(f,2400,0.92)); }
+    overlay.querySelector('#imgProgress').textContent = `✅ 已上传 ${files.length} 张`;
+    await saveAndRefresh(); close();
+  });
+}
+
+function editContact() {
+  const socialStr = (appData.contact.social||[]).map(s=>s.platform+': '+s.url).join('\n');
+  showFormModal('编辑联系方式', [
+    { key:'email', label:'邮箱', value:appData.contact.email||'' },
+    { key:'phone', label:'电话', value:appData.contact.phone||'' },
+    { key:'social', label:'社交账号（每行一个：平台名: 链接）', type:'textarea', value:socialStr },
+  ], vals => {
+    appData.contact.email = vals.email;
+    appData.contact.phone = vals.phone;
+    appData.contact.social = vals.social.split('\n').map(line=>{
+      const [platform,...rest]=line.split(':'); return {platform:(platform||'').trim(),url:(rest.join(':')||'').trim()};
+    }).filter(s=>s.platform&&s.url);
+    saveAndRefresh();
+  });
+}
+
+/* ================================================================
+   事件委托（管理按钮）
+   ================================================================ */
+document.addEventListener('click', function(e) {
+  if(!isAdminMode) return;
+
+  // 技能
+  if(e.target.closest('.edit-skill-btn')) { e.stopPropagation(); editSkill(e.target.closest('.edit-skill-btn').dataset.id); }
+  if(e.target.closest('.del-skill-btn')) { e.stopPropagation(); deleteSkill(e.target.closest('.del-skill-btn').dataset.id); }
+
+  // 经历
+  // 校园经历
+  if(e.target.closest('.edit-campus-btn')) { editCampusExperience(e.target.closest('.edit-campus-btn').dataset.id); }
+  if(e.target.closest('.del-campus-btn')) { deleteCampusExperience(e.target.closest('.del-campus-btn').dataset.id); }
+  if(e.target.closest('.edit-campus-up-btn')) { moveCampusUp(e.target.closest('.edit-campus-up-btn').dataset.id); }
+  if(e.target.closest('.edit-campus-down-btn')) { moveCampusDown(e.target.closest('.edit-campus-down-btn').dataset.id); }
+  // 实习经历
+  if(e.target.closest('.edit-intern-btn')) { editInternship(e.target.closest('.edit-intern-btn').dataset.id); }
+  if(e.target.closest('.del-intern-btn')) { deleteInternship(e.target.closest('.del-intern-btn').dataset.id); }
+  if(e.target.closest('.edit-intern-up-btn')) { moveInternUp(e.target.closest('.edit-intern-up-btn').dataset.id); }
+  if(e.target.closest('.edit-intern-down-btn')) { moveInternDown(e.target.closest('.edit-intern-down-btn').dataset.id); }
+  // 教育
+  if(e.target.closest('.edit-edu-btn')) { editEducation(e.target.closest('.edit-edu-btn').dataset.id); }
+  if(e.target.closest('.del-edu-btn')) { deleteEducation(e.target.closest('.del-edu-btn').dataset.id); }
+  if(e.target.closest('.edit-edu-up-btn')) { moveEduUp(e.target.closest('.edit-edu-up-btn').dataset.id); }
+  if(e.target.closest('.edit-edu-down-btn')) { moveEduDown(e.target.closest('.edit-edu-down-btn').dataset.id); }
+  // 联系方式
+  if(e.target.closest('.edit-contact-item-btn')) { e.stopPropagation(); editContactSimple(); }
+  if(e.target.closest('.del-contact-item-btn')) { e.stopPropagation(); editContactSimple(); }
+  // 项目
+  if(e.target.closest('.edit-proj-btn')) { e.stopPropagation(); editProject(e.target.closest('.edit-proj-btn').dataset.id); }
+  if(e.target.closest('.img-proj-btn')) { e.stopPropagation(); manageProjectImages(e.target.closest('.img-proj-btn').dataset.id); }
+  if(e.target.closest('.size-proj-btn')) { e.stopPropagation(); toggleProjectSize(e.target.closest('.size-proj-btn').dataset.id); }
+  if(e.target.closest('.del-proj-btn')) { e.stopPropagation(); deleteProject(e.target.closest('.del-proj-btn').dataset.id); }
+  if(e.target.closest('.edit-proj-up-btn')) { e.stopPropagation(); moveProjectUp(e.target.closest('.edit-proj-up-btn').dataset.id); }
+  if(e.target.closest('.edit-proj-down-btn')) { e.stopPropagation(); moveProjectDown(e.target.closest('.edit-proj-down-btn').dataset.id); }
+});
+
+// 编辑按钮（非列表项）
+document.getElementById('btnEditProfile').addEventListener('click', editProfile);
+document.getElementById('btnEditAbout').addEventListener('click', editProfile);
+document.getElementById('btnEditContact').addEventListener('click', editContactSimple);
+document.getElementById('btnAddSkill').addEventListener('click', ()=>editSkill(null));
+document.getElementById('btnAddCampus').addEventListener('click', ()=>editCampusExperience(null));
+document.getElementById('btnAddIntern').addEventListener('click', ()=>editInternship(null));
+document.getElementById('btnAddEdu').addEventListener('click', ()=>editEducation(null));
+document.getElementById('btnAddProject').addEventListener('click', ()=>editProject(null));
+
+/* ================================================================
+   搜索
+   ================================================================ */
+document.getElementById('searchInput').addEventListener('input', function() {
+  document.querySelector('a[href="#projects"]').click();
+  renderProjects(this.value);
+});
+
+/* ================================================================
+   管理模式
+   ================================================================ */
+document.getElementById('adminBtn').addEventListener('click', function() {
+  if(isAdminMode) {
+    isAdminMode = false;
+    document.body.classList.remove('admin-mode');
+    this.textContent = '⚙️';
+    this.classList.remove('btn-matcha');
+    this.classList.add('btn-outline');
+    renderAll();
+    return;
+  }
+  const pwd = prompt('请输入管理密码：');
+  if(pwd === null) return;
+  if(pwd === ADMIN_PASSWORD) {
+    isAdminMode = true;
+    document.body.classList.add('admin-mode');
+    this.textContent = '🔒';
+    this.classList.remove('btn-outline');
+    this.classList.add('btn-matcha');
+    renderAll();
+  } else { alert('密码错误。'); }
+});
+
+/* ================================================================
+   布局设置面板
+   ================================================================ */
+const SECTION_META = [
+  { id:'hero', name:'首页', icon:'🏠', fixed:true },
+  { id:'about', name:'关于我', icon:'🙋', fixed:false },
+  { id:'projects', name:'作品集', icon:'💼', fixed:false },
+  { id:'experience', name:'经历', icon:'📄', fixed:false },
+  { id:'skills', name:'技能', icon:'⚡', fixed:false },
+  { id:'contact', name:'联系我', icon:'📬', fixed:false }
+];
+
+function showLayoutPanel() {
+  const overlay = document.createElement('div');
+  overlay.className = 'admin-form-modal';
+
+  const order = appData.sectionOrder || SECTION_META.map(s=>s.id);
+  const items = SECTION_META.map(meta => {
+    const idx = order.indexOf(meta.id);
+    return { ...meta, idx: idx>=0 ? idx : 999 };
+  }).sort((a,b) => a.idx - b.idx);
+
+  const listHtml = items.map((item, i) => `
+    <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;margin-bottom:6px;
+      background:${item.fixed?'var(--cream-dark)':'var(--white)'};border-radius:8px;
+      border:1px solid var(--coffee-pale);${item.fixed?'opacity:0.7':''}">
+      <span style="font-size:20px;">${item.icon}</span>
+      <span style="flex:1;font-weight:600;color:var(--text);">${item.name}</span>
+      ${item.fixed ? '<span style="font-size:11px;color:var(--text-hint);">固定</span>' : `
+        <button class="btn btn-sm btn-outline layout-up" data-id="${item.id}" ${i===0?'disabled':''}>⬆</button>
+        <button class="btn btn-sm btn-outline layout-down" data-id="${item.id}" ${i===items.length-1?'disabled':''}>⬇</button>
+      `}
+    </div>
+  `).join('');
+
+  overlay.innerHTML = `<div class="admin-form">
+    <button class="admin-form-close" id="layoutClose">✕</button>
+    <h3>📐 调整板块布局顺序</h3>
+    <p style="font-size:13px;color:var(--text-hint);margin-bottom:14px;">点击 ⬆ ⬇ 调整顺序，首页固定不可移动</p>
+    <div id="layoutList">${listHtml}</div>
+    <div class="form-actions">
+      <button class="btn btn-outline" id="layoutReset">🔄 恢复默认</button>
+      <button class="btn btn-outline" id="layoutCancel">取消</button>
+      <button class="btn btn-primary" id="layoutSave">💾 保存</button>
+    </div>
+  </div>`;
+  document.body.appendChild(overlay);
+
+  function close(){ overlay.remove(); }
+  overlay.querySelector('#layoutClose').addEventListener('click',close);
+  overlay.querySelector('#layoutCancel').addEventListener('click',close);
+  overlay.addEventListener('click',e=>{ if(e.target===overlay) close(); });
+
+  // ⬆ ⬇ 按钮
+  overlay.querySelectorAll('.layout-up').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const id = this.dataset.id;
+      const idx = order.indexOf(id);
+      if(idx>1) { [order[idx], order[idx-1]] = [order[idx-1], order[idx]]; }
+      overlay.remove(); showLayoutPanel();
+    });
+  });
+  overlay.querySelectorAll('.layout-down').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const id = this.dataset.id;
+      const idx = order.indexOf(id);
+      if(idx>=1 && idx<order.length-1) { [order[idx], order[idx+1]] = [order[idx+1], order[idx]]; }
+      overlay.remove(); showLayoutPanel();
+    });
+  });
+
+  // 保存
+  overlay.querySelector('#layoutSave').addEventListener('click', async () => {
+    appData.sectionOrder = order;
+    await saveAndRefresh();
+    applySectionOrder();
+    close();
+  });
+
+  // 恢复默认
+  overlay.querySelector('#layoutReset').addEventListener('click', () => {
+    appData.sectionOrder = ['hero','about','projects','experience','skills','contact'];
+    overlay.remove();
+    showLayoutPanel();
+  });
+}
+
+function applySectionOrder() {
+  const order = appData.sectionOrder || SECTION_META.map(s=>s.id);
+  const main = document.querySelector('.main-content') || document.body;
+
+  // 收集所有 section 的容器
+  const allSections = {};
+  document.querySelectorAll('section[id]').forEach(s => allSections[s.id] = s);
+
+  // 找到第一个 section 的父容器
+  const container = document.getElementById('hero').parentNode;
+
+  // 按 order 重新排列
+  let prevEl = null;
+  order.forEach(sectionId => {
+    const el = document.getElementById(sectionId);
+    if(!el) return;
+    if(prevEl) {
+      prevEl.insertAdjacentElement('afterend', el);
+    } else {
+      container.insertBefore(el, container.firstChild);
+    }
+    prevEl = el;
+  });
+
+  // 同步导航栏
+  updateNavOrder(order);
+}
+
+function updateNavOrder(order) {
+  const navLinks = document.querySelector('.nav-links');
+  const existingLinks = {};
+  navLinks.querySelectorAll('a').forEach(a => {
+    existingLinks[a.dataset.section] = a;
+  });
+
+  const sectionToNav = {
+    'hero': 'hero', 'about': 'about', 'projects': 'projects',
+    'experience': 'experience', 'skills': 'skills', 'contact': 'contact'
+  };
+
+  navLinks.innerHTML = '';
+  order.forEach(sectionId => {
+    const navId = sectionToNav[sectionId];
+    const meta = SECTION_META.find(s=>s.id===sectionId);
+    if(!meta) return;
+    const a = document.createElement('a');
+    a.href = '#' + sectionId;
+    a.dataset.section = navId || sectionId;
+    a.textContent = meta.icon + ' ' + meta.name;
+    a.addEventListener('click', function(e) {
+      e.preventDefault();
+      document.querySelectorAll('.nav-links a').forEach(l=>l.classList.remove('active'));
+      this.classList.add('active');
+      document.getElementById(sectionId).scrollIntoView({ behavior:'smooth' });
+    });
+    navLinks.appendChild(a);
+  });
+
+  // 重新缓存导航链接
+  refreshNavCache();
+}
+
+function refreshNavCache() {
+  const links = document.querySelectorAll('.nav-links a');
+  sections.length = 0;
+  links.forEach(a => {
+    const el = document.querySelector(a.getAttribute('href'));
+    if(el) sections.push({el, a});
+  });
+  updateActiveNav();
+}
+
+document.getElementById('layoutBtn').addEventListener('click', showLayoutPanel);
+
+/* ================================================================
+   主题设置
+   ================================================================ */
+const FONT_OPTIONS = {
+  nameFont: [
+    { value:'fangsong', label:'仿宋 (FangSong)', sample:'朱羿夫' },
+    { value:'kaiti', label:'楷体 (KaiTi)', sample:'朱羿夫' },
+    { value:'songti', label:'宋体 (SimSun)', sample:'朱羿夫' },
+    { value:'sans', label:'黑体 (SimHei)', sample:'朱羿夫' },
+    { value:'xingkai', label:'行楷 (STXingkai)', sample:'朱羿夫' }
+  ],
+  titleFont: [
+    { value:'serif', label:'思源宋体', sample:'板块标题' },
+    { value:'songti', label:'宋体 (SimSun)', sample:'板块标题' },
+    { value:'sans', label:'黑体 (SimHei)', sample:'板块标题' },
+    { value:'kaiti', label:'楷体 (KaiTi)', sample:'板块标题' }
+  ],
+  bodyFont: [
+    { value:'sans', label:'思源黑体', sample:'正文文字示例' },
+    { value:'yahei', label:'微软雅黑', sample:'正文文字示例' },
+    { value:'songti', label:'宋体 (SimSun)', sample:'正文文字示例' },
+    { value:'kaiti', label:'楷体 (KaiTi)', sample:'正文文字示例' }
+  ]
+};
+
+const COLOR_SCHEMES = {
+  coffee:  { name:'咖啡抹茶',   primary:'#6B3D2E', accent:'#7B8D6E', bg:'#FBF7F2', card:'#FFFFFF', text:'#3D2C26' },
+  navy:    { name:'深海金',     primary:'#2C3E50', accent:'#C4946B', bg:'#F5F6FA', card:'#FFFFFF', text:'#2C3E50' },
+  forest:  { name:'墨绿暖阳',   primary:'#3D5A40', accent:'#D4A574', bg:'#F7F5F0', card:'#FFFFFF', text:'#3A322C' },
+  warm:    { name:'暖棕奶油',   primary:'#8B5E3C', accent:'#C4946B', bg:'#FDF8F3', card:'#FFFFFF', text:'#4A3028' },
+  dark:    { name:'暗夜金',     primary:'#1a1a1a', accent:'#C4946B', bg:'#f5f5f5', card:'#FFFFFF', text:'#222222' }
+};
+
+function applyTheme(theme) {
+  const root = document.documentElement;
+  const cs = COLOR_SCHEMES[theme.colorScheme] || COLOR_SCHEMES.coffee;
+
+  // 配色
+  root.style.setProperty('--coffee-deep', cs.primary);
+  root.style.setProperty('--coffee', cs.primary);
+  root.style.setProperty('--coffee-light', cs.text);
+  root.style.setProperty('--cream', cs.bg);
+  root.style.setProperty('--white', cs.card);
+  root.style.setProperty('--text', theme.textColor || cs.text);
+  root.style.setProperty('--matcha', cs.accent);
+  root.style.setProperty('--matcha-light', cs.accent);
+  root.style.setProperty('--gold', cs.accent);
+
+  // 字体 — 优先用自定义，否则用预设映射
+  const nameMap = { fangsong:'var(--font-fangsong)', kaiti:'KaiTi,"楷体",serif', songti:'SimSun,"宋体",serif', sans:'SimHei,"黑体",sans-serif', xingkai:'STXingkai,"华文行楷",serif' };
+  const titleMap = { serif:'var(--font-serif)', songti:'SimSun,"宋体",serif', sans:'SimHei,"黑体",sans-serif', kaiti:'KaiTi,"楷体",serif' };
+  const bodyMap = { sans:'var(--font-sans)', yahei:'"Microsoft YaHei","微软雅黑",sans-serif', songti:'SimSun,"宋体",serif', kaiti:'KaiTi,"楷体",serif' };
+
+  root.style.setProperty('--hero-name-font', theme.customNameFont || nameMap[theme.nameFont] || nameMap.fangsong);
+  root.style.setProperty('--section-title-font', theme.customTitleFont || titleMap[theme.titleFont] || titleMap.serif);
+  root.style.setProperty('--body-font', theme.customBodyFont || bodyMap[theme.bodyFont] || bodyMap.sans);
+
+  // 自定义颜色
+  root.style.setProperty('--hero-name-color', theme.nameColor || '#ffffff');
+  root.style.setProperty('--hero-title-color', theme.titleColor || 'rgba(255,255,255,0.9)');
+
+  // 字体加粗和阴影
+  const nameWeight = theme.nameBold ? 'bold' : 'normal';
+  const nameShadow = theme.nameShadow ? '0 2px 12px rgba(0,0,0,0.4), 0 0 40px rgba(0,0,0,0.1)' : '0 2px 8px rgba(0,0,0,0.3)';
+  root.style.setProperty('--hero-name-weight', nameWeight);
+  root.style.setProperty('--hero-name-shadow', nameShadow);
+}
+
+function showThemePanel() {
+  const theme = appData.theme || {};
+
+  const overlay = document.createElement('div');
+  overlay.className = 'admin-form-modal';
+
+  const colorOptions = Object.entries(COLOR_SCHEMES).map(([key, cs]) => `
+    <div class="theme-color-opt" data-color="${key}" style="
+      display:inline-flex;align-items:center;gap:8px;padding:8px 14px;margin:4px;
+      border-radius:20px;cursor:pointer;border:2px solid ${theme.colorScheme===key?'var(--coffee)':'transparent'};
+      background:var(--cream-dark);">
+      <span style="width:16px;height:16px;border-radius:50%;background:${cs.primary};display:inline-block;"></span>
+      <span style="width:16px;height:16px;border-radius:50%;background:${cs.accent};display:inline-block;"></span>
+      <span style="font-size:13px;">${cs.name}</span>
+    </div>
+  `).join('');
+
+  function fontPicker(key, label, currentVal) {
+    const opts = FONT_OPTIONS[key];
+    return `<div style="margin-bottom:12px;">
+      <label style="font-size:13px;font-weight:600;">${label}</label>
+      <div style="display:flex;flex-wrap:wrap;gap:4px;margin:4px 0;">${opts.map(o => `
+        <span class="theme-font-opt" data-font="${key}" data-val="${o.value}" style="
+          padding:6px 12px;border-radius:14px;cursor:pointer;font-size:14px;
+          border:2px solid ${currentVal===o.value?'var(--coffee)':'var(--coffee-pale)'};
+          background:${currentVal===o.value?'var(--cream-dark)':'transparent'};">${o.sample}</span>
+      `).join('')}</div>
+      <input class="form-input theme-font-input" data-font="${key}" placeholder="或输入任意字体名称..." value="${escapeHtml(theme[key.startsWith('custom')?key:'custom'+key.charAt(0).toUpperCase()+key.slice(1)]||'')}" style="height:32px;font-size:13px;">
+    </div>`;
+  }
+
+  overlay.innerHTML = `<div class="admin-form" style="max-width:560px;">
+    <button class="admin-form-close" id="themeClose">✕</button>
+    <h3>🎨 主题设置</h3>
+
+    <label style="font-size:13px;font-weight:600;">配色方案</label>
+    <div style="margin-bottom:12px;">${colorOptions}</div>
+
+    <label style="font-size:13px;font-weight:600;">自定义颜色</label>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
+      <div><label style="font-size:11px;color:var(--text-hint);">姓名颜色</label><input type="color" class="theme-color-input" data-key="nameColor" value="${theme.nameColor||'#ffffff'}" style="width:40px;height:30px;border:none;cursor:pointer;"></div>
+      <div><label style="font-size:11px;color:var(--text-hint);">头衔颜色</label><input type="color" class="theme-color-input" data-key="titleColor" value="${theme.titleColor||'rgba(255,255,255,0.9)'}" style="width:40px;height:30px;border:none;cursor:pointer;"></div>
+      <div><label style="font-size:11px;color:var(--text-hint);">正文颜色</label><input type="color" class="theme-color-input" data-key="textColor" value="${theme.textColor||'#3D2C26'}" style="width:40px;height:30px;border:none;cursor:pointer;"></div>
+    </div>
+
+    ${fontPicker('nameFont', '姓名字体', theme.nameFont||'fangsong')}
+    ${fontPicker('titleFont', '标题字体', theme.titleFont||'serif')}
+    ${fontPicker('bodyFont', '正文字体', theme.bodyFont||'sans')}
+
+    <div class="form-actions">
+      <button class="btn btn-outline" id="themeReset">🔄 默认</button>
+      <button class="btn btn-outline" id="themeCancel">取消</button>
+      <button class="btn btn-primary" id="themeSave">💾 保存</button>
+    </div>
+  </div>`;
+  document.body.appendChild(overlay);
+
+  function close(){ overlay.remove(); }
+  overlay.querySelector('#themeClose').addEventListener('click',close);
+  overlay.querySelector('#themeCancel').addEventListener('click',close);
+  overlay.addEventListener('click',e=>{ if(e.target===overlay) close(); });
+
+  // 配色选择
+  overlay.querySelectorAll('.theme-color-opt').forEach(opt => {
+    opt.addEventListener('click', function() {
+      theme.colorScheme = this.dataset.color;
+      applyTheme(theme);
+      overlay.remove(); showThemePanel();
+    });
+  });
+
+  // 颜色输入
+  overlay.querySelectorAll('.theme-color-input').forEach(input => {
+    input.addEventListener('input', function() {
+      theme[this.dataset.key] = this.value;
+      applyTheme(theme);
+    });
+  });
+
+  // 字体预设
+  overlay.querySelectorAll('.theme-font-opt').forEach(opt => {
+    opt.addEventListener('click', function() {
+      theme[this.dataset.font] = this.dataset.val;
+      applyTheme(theme);
+      overlay.remove(); showThemePanel();
+    });
+  });
+
+  // 自定义字体输入
+  overlay.querySelectorAll('.theme-font-input').forEach(input => {
+    const key = 'custom' + input.dataset.font.charAt(0).toUpperCase() + input.dataset.font.slice(1);
+    input.addEventListener('input', function() {
+      theme[key] = this.value;
+      applyTheme(theme);
+    });
+  });
+
+  // 保存
+  overlay.querySelector('#themeSave').addEventListener('click', async () => {
+    appData.theme = theme;
+    await saveData(appData);
+    close();
+  });
+
+  // 重置
+  overlay.querySelector('#themeReset').addEventListener('click', () => {
+    const def = { nameFont:'fangsong', titleFont:'serif', bodyFont:'sans', colorScheme:'coffee', nameColor:'#ffffff', titleColor:'rgba(255,255,255,0.9)', textColor:'#3D2C26', customNameFont:'', customTitleFont:'', customBodyFont:'' };
+    Object.assign(theme, def);
+    applyTheme(theme);
+    overlay.remove(); showThemePanel();
+  });
+}
+
+document.getElementById('themeBtn').addEventListener('click', showThemePanel);
+
+/* ================================================================
+   导航：平滑滚动 + 高亮
+   ================================================================ */
+document.querySelectorAll('.nav-links a').forEach(link => {
+  link.addEventListener('click', function(e) {
+    e.preventDefault();
+    const target = document.querySelector(this.getAttribute('href'));
+    if(target) target.scrollIntoView({ behavior:'smooth' });
+  });
+});
+
+// 滚动时自动高亮当前区域
+const navLinks = document.querySelectorAll('.nav-links a');
+const sections = [];
+navLinks.forEach(a => { const el = document.querySelector(a.getAttribute('href')); if(el) sections.push({el, a}); });
+
+function updateActiveNav() {
+  let current = sections[0];
+  sections.forEach(s => {
+    if(s.el.getBoundingClientRect().top <= 120) current = s;
+  });
+  navLinks.forEach(a => a.classList.remove('active'));
+  if(current) current.a.classList.add('active');
+}
+window.addEventListener('scroll', updateActiveNav, {passive:true});
+
+/* ================================================================
+   淡入动画
+   ================================================================ */
+const fadeObserver = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if(entry.isIntersecting) entry.target.classList.add('visible');
+  });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('.fade-in').forEach(el => fadeObserver.observe(el));
+
+/* ================================================================
+   导出/导入
+   ================================================================ */
+document.getElementById('btnReset').addEventListener('click', async function() {
+  if(!confirm('⚠️ 确定要重置为默认数据吗？\n\n这会清空你所有的修改！\n建议先导出备份。')) return;
+  appData = getDefaultData();
+  await saveData(appData);
+  renderAll();
+  applySectionOrder();
+  alert('✅ 已重置为默认数据。');
+});
+
+document.getElementById('btnExport').addEventListener('click', async function() {
+  const data = await loadData();
+  const json = JSON.stringify(data, null, 2);
+  const blob = new Blob([json], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const today = new Date().toISOString().slice(0,10);
+  const a = document.createElement('a');
+  a.href=url; a.download='简历备份_'+today+'.json';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  alert('✅ 已导出！');
+});
+
+const importInput = document.getElementById('importFileInput');
+document.getElementById('btnImport').addEventListener('click', ()=>{
+  if(!confirm('⚠️ 导入将覆盖当前数据，确定？')) return;
+  importInput.click();
+});
+importInput.addEventListener('change', async function() {
+  const file = this.files[0];
+  if(!file) return;
+  try {
+    const text = await new Promise((res,rej)=>{
+      const r=new FileReader(); r.onload=e=>res(e.target.result); r.onerror=rej; r.readAsText(file,'UTF-8');
+    });
+    const data = JSON.parse(text);
+    if(!data.profile && !data.projects) throw new Error('格式不正确');
+    await saveData(data);
+    appData = data;
+    renderAll();
+    alert('✅ 导入成功！');
+  } catch(err) { alert('❌ 导入失败：'+err.message); }
+  this.value = '';
+});
+
+/* ================================================================
+   初始化
+   ================================================================ */
+(async function init() {
+  try {
+    appData = await loadData();
+    // 自动修复：旧数据没有演示图的项目 → 注入演示图
+    if(appData.projects) {
+      let fixed = false;
+      appData.projects.forEach(p => {
+        if(!p.images || p.images.length === 0) {
+          if(p.name === 'AI 真人短剧') { p.images = generateDemoImages('AI 真人短剧', ['分镜设计','AI 生图','成片截图']); fixed = true; }
+          else if(p.name === '动画《熠》') { p.images = generateDemoImages('动画《熠》', ['角色设计稿','场景渲染','最终成片']); fixed = true; }
+        }
+      });
+      if(fixed) await saveData(appData);
+    }
+    if(!appData.sectionOrder) appData.sectionOrder = ['hero','about','projects','experience','skills','contact'];
+    if(appData.profile.banner === undefined) appData.profile.banner = '';
+    // 迁移旧联系方式格式
+    if(appData.contact && !appData.contact.items) {
+      const items = [];
+      if(appData.contact.email) items.push({ id:genId(), icon:'✉️', label:'邮箱', value:appData.contact.email, link:'mailto:'+appData.contact.email });
+      if(appData.contact.phone) items.push({ id:genId(), icon:'📱', label:'电话', value:appData.contact.phone, link:'' });
+      if(appData.contact.social) appData.contact.social.forEach(s => items.push({ id:genId(), icon:'🔗', label:s.platform, value:s.url, link:s.url }));
+      appData.contact.items = items;
+      await saveData(appData);
+    }
+    if(!appData.theme) appData.theme = { nameFont:'fangsong', titleFont:'serif', bodyFont:'sans', colorScheme:'coffee', customNameFont:'', customTitleFont:'', customBodyFont:'', nameColor:'#ffffff', titleColor:'rgba(255,255,255,0.9)', textColor:'#3D2C26' };
+    applyTheme(appData.theme);
+    // 首次加载时，经历按时间排序
+    if(appData.campusExperience && !appData._sorted) {
+      appData.campusExperience = sortByDate(appData.campusExperience);
+      appData.internship = sortByDate(appData.internship || []);
+      appData.education = sortByDate(appData.education || []);
+      appData._sorted = true;
+      await saveData(appData);
+    }
+    renderAll();
+    applySectionOrder();
+    console.log('✅ 就绪！');
+  } catch(err) { console.error('初始化失败:', err); }
+})();
+</script>
+
+</body>
+</html>
