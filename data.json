@@ -1,0 +1,51 @@
+{
+  "profile": {
+    "name": "朱羿夫",
+    "title": "AIGC 视频制作 · 视觉传达",
+    "photo": "",
+    "banner": "",
+    "location": "武汉",
+    "experience": "硕士在读",
+    "status": "应届生 · 寻求 AIGC/视频制作岗位",
+    "bio": "视觉传达硕士在读，本科为三维动画专业，具备动画影像、AIGC 视频制作与短视频运营复合背景。\n\n热爱并持续钻研 AI 内容创作工具，熟悉即梦、小云雀、Gemini、Index、剪映等工具，参与过 AI 真人短剧项目。\n\n具备抖音账号运营与文案策划经验，对短视频平台内容趋势有较强敏感度。",
+    "hobbies": ["🎬 视频创作", "🤖 AIGC", "📹 短视频运营", "🎨 视觉设计"]
+  },
+  "skills": [
+    {"id":"sk-1","name":"Stable Diffusion","icon":"🤖","category":"AIGC 工具"},
+    {"id":"sk-2","name":"Gemini","icon":"🧠","category":"AIGC 工具"},
+    {"id":"sk-3","name":"小云雀 / Lovart","icon":"☁️","category":"AIGC 工具"},
+    {"id":"sk-4","name":"即梦","icon":"✨","category":"AIGC 工具"},
+    {"id":"sk-7","name":"剪映","icon":"✂️","category":"视频制作"},
+    {"id":"sk-8","name":"短视频剪辑","icon":"📹","category":"视频制作"},
+    {"id":"sk-11","name":"Photoshop","icon":"🖼️","category":"视觉设计"},
+    {"id":"sk-12","name":"Adobe Illustrator","icon":"🎨","category":"视觉设计"},
+    {"id":"sk-13","name":"Maya","icon":"🗿","category":"视觉设计"}
+  ],
+  "projects": [
+    {"id":"proj-1","name":"AI 真人短剧","description":"参与 AI 真人短剧项目制作，使用 Gemini 完成剧本拆解与分镜规划，基于小云雀、Lovart 平台使用 Seedance 2.0 进行生图生视频，后期通过 Index、剪映完成剪辑与节奏包装。","images":[],"tags":["AIGC","Gemini","Seedance","Lovart","Index","剪映"],"link":"","date":"2026.05","category":"工作项目","size":"large"},
+    {"id":"proj-2","name":"动画《熠》","description":"统筹 9 人团队完成五分钟三维动画短片。负责项目进度推进、镜头 layout、blocking 审核及画面节奏把控。","images":[],"tags":["Maya","Photoshop","三维动画","分镜设计"],"link":"","date":"2024.06","category":"个人项目","size":"large"},
+    {"id":"proj-3","name":"医生抖音账号运营","description":"负责两位医生抖音账号的内容运营与文案策划。平均每三条有一条播放量破万，单条最高播放量约 80 万。","images":[],"tags":["抖音运营","文案策划","短视频"],"link":"","date":"2026.06","category":"工作项目","size":"medium"},
+    {"id":"proj-4","name":"社区服务 PBL 项目","description":"参与社区服务项目，负责前期调研、活动策划、物料准备及 PBL 项目执行。","images":[],"tags":["PBL","调研策划","团队协作"],"link":"","date":"2026.02","category":"个人项目","size":"small"}
+  ],
+  "campusExperience": [
+    {"id":"cam-1","title":"AI 真人短剧项目","organization":"AIGC 视频制作","description":"参与 AI 真人短剧项目制作，完成从剧本拆解、分镜设计、AI 生图到成片交付的完整 AI 影视工作流。","startDate":"2026.03","endDate":"2026.05"},
+    {"id":"cam-2","title":"武汉亚心医院医生抖音运营","organization":"短视频运营","description":"负责两位医生抖音账号的内容运营与文案策划，单条最高播放量约 80 万。","startDate":"2026.03","endDate":"2026.06"},
+    {"id":"cam-3","title":"动画《熠》","organization":"项目负责人 · 三维动画制作","description":"统筹 9 人团队完成三维动画项目制作，项目获得校内专业评审好评。","startDate":"2023.12","endDate":"2024.06"}
+  ],
+  "internship": [
+    {"id":"int-1","company":"中建城市建设发展有限公司","position":"投标专员","description":"协助完成投标文件整理、资料校对、文档排版与基础商务文件编制工作。","startDate":"2024.04","endDate":"2024.07"}
+  ],
+  "education": [
+    {"id":"edu-1","school":"江汉大学","major":"视觉传达","degree":"硕士","startDate":"2025.09","endDate":"至今"},
+    {"id":"edu-2","school":"吉林动画学院","major":"动画","degree":"本科","startDate":"2020.09","endDate":"2024.06"}
+  ],
+  "contact": {
+    "items": [
+      {"id":"ct-1","icon":"✉️","label":"邮箱","value":"1907765881@qq.com","link":"mailto:1907765881@qq.com"},
+      {"id":"ct-2","icon":"📱","label":"电话","value":"138 7230 3825","link":""},
+      {"id":"ct-3","icon":"💬","label":"微信","value":"zhuyifu_wx","link":""}
+    ]
+  },
+  "sectionOrder": ["hero","about","projects","experience","skills","contact"],
+  "theme": {"nameFont":"fangsong","titleFont":"serif","bodyFont":"sans","colorScheme":"coffee","nameColor":"#ffffff","titleColor":"rgba(255,255,255,0.9)","textColor":"#3D2C26","nameBold":true,"nameShadow":true}
+}

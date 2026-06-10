@@ -2608,56 +2608,15 @@ document.querySelectorAll('.fade-in').forEach(el => fadeObserver.observe(el));
    导出/导入
    ================================================================ */
 document.getElementById('btnPublish').addEventListener('click', async function() {
-  // 获取 GitHub token（首次输入后存 localStorage）
-  let token = localStorage.getItem('gh_token');
-  if(!token) {
-    token = prompt('请输入 GitHub Personal Access Token（只需输入一次）：\n\n获取方式：github.com/settings/tokens → Generate new token → 勾选 repo');
-    if(!token) return;
-    localStorage.setItem('gh_token', token);
-  }
-
-  const repo = 'yifuzhu29-a11y/portfolio';
+  // 下载 data.json 到本地
   const dataJson = JSON.stringify(appData, null, 2);
-
-  // 先尝试获取现有文件（需要 sha 才能更新）
-  let sha = '';
-  try {
-    const getResp = await fetch(`https://api.github.com/repos/${repo}/contents/data.json`, {
-      headers: { 'Authorization': 'token ' + token }
-    });
-    if(getResp.ok) {
-      const info = await getResp.json();
-      sha = info.sha;
-    }
-  } catch(e) {}
-
-  // Base64 编码数据
-  const base64 = btoa(unescape(encodeURIComponent(dataJson)));
-
-  // 上传到 GitHub
-  const body = { message: '更新数据 ' + new Date().toLocaleString(), content: base64 };
-  if(sha) body.sha = sha;
-
-  try {
-    const resp = await fetch(`https://api.github.com/repos/${repo}/contents/data.json`, {
-      method: 'PUT',
-      headers: { 'Authorization': 'token ' + token, 'Content-Type': 'application/json' },
-      body: JSON.stringify(body)
-    });
-    if(resp.ok) {
-      alert('✅ 链接已生成！\n\n你的在线页面：\nhttps://yifuzhu29-a11y.github.io/portfolio/\n\n约 1 分钟后生效，刷新即可看到最新内容。');
-    } else {
-      const err = await resp.json();
-      if(resp.status === 401) {
-        localStorage.removeItem('gh_token');
-        alert('❌ Token 无效或已过期，请重新点击按钮输入。');
-      } else {
-        alert('❌ 发布失败：' + (err.message || '未知错误'));
-      }
-    }
-  } catch(e) {
-    alert('❌ 网络错误，请检查网络后重试。');
-  }
+  const blob = new Blob([dataJson], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'data.json';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  alert('✅ data.json 已下载！\n\n请把这个文件发给我，我帮你推送到网站。\n\n或者：打开 github.com/yifuzhu29-a11y/portfolio\n→ 点击 Upload files → 拖入 data.json → 提交');
 });
 
 document.getElementById('btnReset').addEventListener('click', async function() {
