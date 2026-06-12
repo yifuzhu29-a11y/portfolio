@@ -1467,14 +1467,23 @@
     heroVideoInput.addEventListener("change", async () => {
       const file = heroVideoInput.files && heroVideoInput.files[0];
       if (!file) return;
+      // 限制文件大小 50MB
+      if(file.size > 50 * 1024 * 1024) {
+        alert("视频文件不能超过 50MB，请压缩后再试。当前文件大小："+(file.size/1024/1024).toFixed(1)+"MB");
+        heroVideoInput.value = '';
+        return;
+      }
       try {
         await saveHeroVideoFile(file);
         setHeroVideoSource(file);
         heroSettings = { ...heroSettings, mode: "video" };
         applyHeroSettings(heroSettings);
         saveHeroSettings(heroSettings);
+        hero.classList.add("video-active");
+        alert("✅ 背景视频已更新！");
       } catch (error) {
-        alert("视频保存失败，可能是文件太大。可以尝试换一个更短或压缩后的视频。");
+        alert("视频保存失败："+error.message+"。可以尝试压缩视频后再上传。");
+        heroVideoInput.value = '';
       }
     });
 
