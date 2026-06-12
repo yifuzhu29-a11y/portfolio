@@ -1,4 +1,1567 @@
-<!DOCTYPE html>
+
+    /* === 管理功能 === */
+    pc.onclick = function() { uploadProfilePhoto(); };
+  } else {
+    pc.style.cursor = 'default';
+    pc.onclick = null;
+  }
+
+  // 元信息
+  const meta = document.getElementById('heroMeta');
+  let metaItems = [];
+  if(p.location) metaItems.push(`<span>📍 ${escapeHtml(p.location)}</span>`);
+  if(p.experience) metaItems.push(`<span>💼 ${escapeHtml(p.experience)}</span>`);
+  if(p.status) metaItems.push(`<span>🎯 ${escapeHtml(p.status)}</span>`);
+  meta.innerHTML = metaItems.join('');
+
+  // 内联编辑：管理模式下点击姓名/头衔/简介可编辑
+  if(isAdminMode) {
+    const nameEl = document.getElementById('heroName');
+    nameEl.style.cursor = 'pointer';
+    nameEl.title = '点击编辑姓名';
+    nameEl.onclick = function() { editProfile(); };
+
+    const titleEl = document.getElementById('heroTitle');
+    titleEl.style.cursor = 'pointer';
+    titleEl.title = '点击编辑头衔';
+    titleEl.onclick = function() { editProfile(); };
+
+    // 照片栏
+    renderPhotoBar();
+  }
+
+  // 爱好标签
+  const hc = document.getElementById('heroHobbies');
+  if(hc) hc.innerHTML = (p.hobbies||[]).map(h => `<span class="tag tag-outline">${escapeHtml(h)}</span>`).join('');
+}
+
+// 头像裁剪器
+async function uploadProfilePhoto() {
+  const overlay = document.createElement('div');
+  overlay.className = 'admin-form-modal';
+  overlay.innerHTML = `<div class="admin-form" style="max-width:500px;text-align:center;">
+    <button class="admin-form-close" id="cropClose">✕</button>
+    <h3>✂️ 裁剪头像</h3>
+    <div style="width:300px;height:300px;margin:16px auto;border-radius:50%;overflow:hidden;background:#ddd;position:relative;cursor:grab;" id="cropBox">
+      <canvas id="cropCanvas" width="300" height="300" style="display:block;width:300px;height:300px;"></canvas>
+    </div>
+    <p style="font-size:12px;color:var(--text-hint);">🖱️ 滚轮缩放 · 拖拽移动 · 圆形裁剪</p>
+    <input type="range" id="cropZoom" min="0.3" max="4" step="0.02" value="1" style="width:200px;margin:8px 0;">
+    <div class="form-actions" style="justify-content:center;">
+      <button class="btn btn-outline" id="cropUploadBtn">📷 选择图片</button>
+      <button class="btn btn-outline" id="cropCancelBtn">取消</button>
+      <button class="btn btn-primary" id="cropSaveBtn">✂️ 裁剪保存</button>
+    </div>
+  </div>`;
+  document.body.appendChild(overlay);
+
+  const box = overlay.querySelector('#cropBox');
+  const canvas = overlay.querySelector('#cropCanvas');
+  const ctx = canvas.getContext('2d');
+  const SIZE = 300;
+
+  let img = null;
+  let scale = 1, offX = 0, offY = 0;
+  let dragging = false, lastMX = 0, lastMY = 0;
+  let hasImg = false;
+
+  function redraw() {
+    ctx.clearRect(0, 0, SIZE, SIZE);
+    if(!hasImg || !img) { ctx.fillStyle = '#ddd'; ctx.fillRect(0,0,SIZE,SIZE); return; }
+    ctx.save();
+    ctx.beginPath(); ctx.arc(SIZE/2, SIZE/2, SIZE/2, 0, Math.PI*2); ctx.clip();
+    ctx.fillStyle = '#ddd'; ctx.fillRect(0,0,SIZE,SIZE);
+    ctx.drawImage(img, offX, offY, img.width * scale, img.height * scale);
+    ctx.restore();
+  }
+
+  function loadImg(src) {
+    img = new Image();
+    img.onload = function() {
+      hasImg = true;
+      const s = Math.max(SIZE / img.width, SIZE / img.height);
+      scale = s;
+      offX = (SIZE - img.width * s) / 2;
+      offY = (SIZE - img.height * s) / 2;
+      const slider = overlay.querySelector('#cropZoom');
+      if(slider) slider.value = s;
+      redraw();
+    };
+    img.src = src;
+  }
+
+  // 加载已有头像
+  if(appData.profile.photo) loadImg(appData.profile.photo);
+  else redraw();
+
+  // 滚轮
+  box.addEventListener('wheel', function(e) {
+    e.preventDefault(); e.stopPropagation();
+    if(!hasImg) return;
+    const oldS = scale;
+    scale = Math.max(0.3, Math.min(4, scale - e.deltaY * 0.003));
+    const rect = box.getBoundingClientRect();
+    const mx = e.clientX - rect.left - SIZE/2;
+    const my = e.clientY - rect.top - SIZE/2;
+    offX = mx + (offX - mx) * (scale / oldS);
+    offY = my + (offY - my) * (scale / oldS);
+    const slider = overlay.querySelector('#cropZoom');
+    if(slider) slider.value = scale;
+    redraw();
+  }, {passive:false});
+
+  // 拖拽
+  function onDown(e) {
+    if(!hasImg) return;
+    dragging = true; lastMX = e.clientX; lastMY = e.clientY;
+    box.style.cursor = 'grabbing';
+    e.preventDefault();
+  }
+  function onMove(e) {
+    if(!dragging) return;
+    offX += e.clientX - lastMX;
+    offY += e.clientY - lastMY;
+    lastMX = e.clientX; lastMY = e.clientY;
+    redraw();
+  }
+  function onUp() { dragging = false; if(box) box.style.cursor = 'grab'; }
+
+  box.addEventListener('mousedown', onDown);
+  document.addEventListener('mousemove', onMove);
+  document.addEventListener('mouseup', onUp);
+
+  // 滑块
+  overlay.querySelector('#cropZoom').addEventListener('input', function() {
+    if(!hasImg) return;
+    const oldS = scale;
+    scale = parseFloat(this.value);
+    offX = SIZE/2 + (offX - SIZE/2) * (scale / oldS);
+    offY = SIZE/2 + (offY - SIZE/2) * (scale / oldS);
+    redraw();
+  });
+
+  // 选图
+  overlay.querySelector('#cropUploadBtn').addEventListener('click', function() {
+    const inp = document.createElement('input');
+    inp.type = 'file'; inp.accept = 'image/*';
+    inp.onchange = function() {
+      if(!this.files[0]) return;
+      const r = new FileReader();
+      r.onload = function(ev) { loadImg(ev.target.result); };
+      r.readAsDataURL(this.files[0]);
+    };
+    inp.click();
+  });
+
+  // 清理
+  function cleanup() {
+    document.removeEventListener('mousemove', onMove);
+    document.removeEventListener('mouseup', onUp);
+    overlay.remove();
+  }
+
+  // 保存
+  overlay.querySelector('#cropSaveBtn').addEventListener('click', async function() {
+    if(!hasImg || !img) return;
+    const out = document.createElement('canvas');
+    out.width = SIZE; out.height = SIZE;
+    const octx = out.getContext('2d');
+    octx.beginPath(); octx.arc(SIZE/2, SIZE/2, SIZE/2, 0, Math.PI*2); octx.clip();
+    octx.drawImage(img, offX, offY, img.width * scale, img.height * scale);
+    appData.profile.photo = out.toDataURL('image/jpeg', 0.9);
+    await saveAndRefresh();
+    cleanup();
+  });
+
+  overlay.querySelector('#cropClose').addEventListener('click', cleanup);
+  overlay.querySelector('#cropCancelBtn').addEventListener('click', cleanup);
+  overlay.addEventListener('click', function(e) { if(e.target === overlay) cleanup(); });
+}
+
+// 照片栏
+function renderPhotoBar() {
+  const hero = document.getElementById('hero');
+  let bar = hero.querySelector('.photo-bar');
+  if(!bar) {
+    bar = document.createElement('div');
+    bar.className = 'photo-bar';
+    hero.appendChild(bar);
+  }
+  const photos = appData.profile.gallery || [];
+  bar.innerHTML = `<div style="text-align:center;padding:12px 0 0;">
+    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">${photos.map((img,i) => `
+      <div style="position:relative;width:100px;height:100px;border-radius:8px;overflow:hidden;border:2px solid var(--coffee-pale);">
+        <img src="${img}" style="width:100%;height:100%;object-fit:cover;cursor:pointer;" onclick="showFullscreenImage('${img}', ${JSON.stringify(photos).replace(/"/g,'&quot;')})">
+        ${isAdminMode ? `<button onclick="deleteGalleryImg(${i})" style="position:absolute;top:2px;right:2px;width:20px;height:20px;border-radius:50%;border:none;background:var(--red);color:#fff;font-size:10px;cursor:pointer;">✕</button>` : ''}
+      </div>`).join('')}
+      ${isAdminMode ? `<div class="upload-area" onclick="addGalleryImg()" style="width:100px;height:100px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:28px;color:var(--coffee-pale);">➕</div>` : ''}
+    </div>
+  </div>`;
+}
+
+async function addGalleryImg() {
+  const input = document.createElement('input');
+  input.type = 'file'; input.accept = 'image/*'; input.multiple = true;
+  input.onchange = async function() {
+    if(!appData.profile.gallery) appData.profile.gallery = [];
+    for(const f of Array.from(this.files)) {
+      appData.profile.gallery.push(await compressImage(f, 1200, 0.88));
+    }
+    await saveAndRefresh();
+  };
+  input.click();
+}
+
+async function deleteGalleryImg(idx) {
+  appData.profile.gallery.splice(idx, 1);
+  await saveAndRefresh();
+}
+
+function renderAbout() {
+  document.getElementById('aboutText').textContent = appData.profile.bio || '暂无简介';
+  document.getElementById('aboutHobbies').innerHTML = (appData.profile.hobbies||[]).map(h =>
+    `<span class="tag tag-outline">${escapeHtml(h)}</span>`
+  ).join('');
+}
+
+/* ================================================================
+   渲染：技能（按分类）
+   ================================================================ */
+function renderSkills() {
+  const container = document.getElementById('skillsContainer');
+  const skills = appData.skills || [];
+  if(!skills.length) { container.innerHTML = '<p style="color:var(--text-hint);">暂无技能数据</p>'; return; }
+  const cats = {};
+  skills.forEach(s => { const cat = s.category || '其他'; if(!cats[cat]) cats[cat] = []; cats[cat].push(s); });
+  let html = '';
+  for(const [cat, items] of Object.entries(cats)) {
+    html += `<div style="margin-bottom:20px;"><div class="skill-cat-name">${escapeHtml(cat)}</div><div style="display:flex;flex-wrap:wrap;gap:10px;">`;
+    items.forEach(s => {
+      let iconHtml = '';
+      if(s.icon) {
+        if(s.icon.startsWith('data:')) iconHtml = `<img src="${s.icon}" style="width:24px;height:24px;object-fit:contain;margin-right:4px;border-radius:4px;">`;
+        else iconHtml = `<span style="font-size:22px;margin-right:4px;">${escapeHtml(s.icon)}</span>`;
+      }
+      html += `<div class="skill-tag-card">${iconHtml}<span>${escapeHtml(s.name)}</span>`;
+      if(isAdminMode) html += `<div class="edit-actions" style="margin-top:6px;"><button class="btn btn-sm btn-outline edit-skill-btn" data-id="${s.id}">✏️</button><button class="btn btn-sm btn-danger del-skill-btn" data-id="${s.id}">🗑️</button></div>`;
+      html += '</div>';
+    });
+    html += '</div></div>';
+  }
+  container.innerHTML = html;
+}
+/* ================================================================
+   渲染：作品集
+   ================================================================ */
+function renderProjects(filterText) {
+  const grid = document.getElementById('projectGrid');
+  const filterBar = document.getElementById('filterBar');
+
+  let projects = appData.projects || [];
+  const keyword = (filterText||'').trim().toLowerCase();
+
+  // 分类筛选
+  if(currentFilter !== '全部') {
+    projects = projects.filter(p => p.category === currentFilter);
+  }
+  // 搜索
+  if(keyword) {
+    projects = projects.filter(p => p.name.toLowerCase().includes(keyword)
+      || p.description.toLowerCase().includes(keyword)
+      || (p.tags||[]).some(t => t.toLowerCase().includes(keyword)));
+  }
+
+  // 筛选栏
+  const allCats = ['全部', ...new Set((appData.projects||[]).map(p => p.category || '未分类').filter(Boolean))];
+  filterBar.innerHTML = allCats.map(c =>
+    `<span class="tag ${c === currentFilter ? 'tag-active' : ''}" data-cat="${escapeHtml(c)}">${escapeHtml(c)}</span>`
+  ).join('');
+
+  if(!projects.length) {
+    grid.innerHTML = `<p style="color:var(--text-hint);text-align:center;padding:40px;grid-column:1/-1;">${keyword ? '没有匹配的项目':'暂无项目'}</p>`;
+    return;
+  }
+
+  grid.innerHTML = projects.map((proj, idx) => {
+    const size = proj.size || 'medium';
+    const sizeClass = size === 'large' ? ' project-card-large' : (size === 'small' ? ' project-card-small' : '');
+    const coverH = size === 'large' ? '260px' : (size === 'small' ? '140px' : '200px');
+    let coverHtml;
+    if(proj.images && proj.images.length>0) coverHtml = `<img class="project-cover" src="${proj.images[0]}" alt="${escapeHtml(proj.name)}" style="height:${coverH};">`;
+    else coverHtml = `<div class="project-cover-placeholder" style="height:${coverH};">💼</div>`;
+
+    const tagsHtml = (proj.tags||[]).map(t => `<span class="tag">${escapeHtml(t)}</span>`).join('');
+    const linkHint = proj.link ? '<span class="project-link-hint">🔗 有链接</span>' : '';
+
+    return `<div class="project-card${sizeClass}" data-id="${proj.id}">
+      ${coverHtml}
+      <div class="project-body">
+        <div class="project-name">${escapeHtml(proj.name)}</div>
+        <div class="project-desc">${escapeHtml(proj.description)}</div>
+        <div class="project-tags">${tagsHtml}</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <span class="project-date">📅 ${escapeHtml(proj.date||'')}</span>
+          ${linkHint}
+        </div>
+        ${isAdminMode ? `<div class="edit-actions" style="margin-top:10px;">
+          ${idx > 0 ? `<button class="btn btn-sm btn-outline edit-proj-up-btn" data-id="${proj.id}">⬆</button>` : ''}
+          ${idx < projects.length-1 ? `<button class="btn btn-sm btn-outline edit-proj-down-btn" data-id="${proj.id}">⬇</button>` : ''}
+          <button class="btn btn-sm btn-outline edit-proj-btn" data-id="${proj.id}">✏️</button>
+          <button class="btn btn-sm btn-outline img-proj-btn" data-id="${proj.id}">📷</button>
+          <button class="btn btn-sm btn-outline size-proj-btn" data-id="${proj.id}">📐</button>
+          <button class="btn btn-sm btn-danger del-proj-btn" data-id="${proj.id}">🗑️</button>
+        </div>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+
+  // 项目卡片点击 → 详情
+  grid.querySelectorAll('.project-card').forEach(card => {
+    card.addEventListener('click', function(e) {
+      if(e.target.closest('.edit-actions') || e.target.closest('button')) return;
+      openProjectDetail(this.dataset.id);
+    });
+  });
+
+  // 筛选标签点击
+  filterBar.querySelectorAll('.tag').forEach(tag => {
+    tag.addEventListener('click', function() {
+      currentFilter = this.dataset.cat;
+      renderProjects(document.getElementById('searchInput').value);
+    });
+  });
+}
+
+/* ================================================================
+   渲染：经历
+   ================================================================ */
+function sortByDate(arr) {
+  return [...arr].sort((a,b) => {
+    const da = a.endDate || a.startDate || '';
+    const db = b.endDate || b.startDate || '';
+    if(da === '至今') return -1; if(db === '至今') return 1;
+    return db.localeCompare(da); // 倒序：最近的在前面
+  });
+}
+
+function renderTimeline(containerId, items, fields, editCls, delCls) {
+  const container = document.getElementById(containerId);
+  if(!items || !items.length) { container.innerHTML='<p style="color:var(--text-hint);">暂无</p>'; return; }
+  // 直接用数组顺序（初始已排序，手动调序后保持）
+  const list = items;
+  container.innerHTML = list.map((item, idx) => {
+    let html = `<div class="timeline-item" data-id="${item.id}">
+      <div class="timeline-date">${escapeHtml(item[fields[0]])} — ${escapeHtml(item[fields[1]])}</div>
+      <div class="timeline-title">${escapeHtml(item[fields[2]])}</div>
+      <div class="timeline-subtitle">${escapeHtml(item[fields[3]])}</div>`;
+    if(item[fields[4]]) html += `<div class="timeline-desc">${escapeHtml(item[fields[4]])}</div>`;
+    if(item.image) html += `<img src="${item.image}" style="max-width:100%;max-height:200px;border-radius:6px;margin-top:8px;cursor:pointer;" onclick="showFullscreenImage('${item.image}',['${item.image}'])">`;
+    if(isAdminMode) html += `<div class="edit-actions">
+      ${idx > 0 ? `<button class="btn btn-sm btn-outline ${editCls}-up-btn" data-id="${item.id}">⬆</button>` : ''}
+      ${idx < list.length-1 ? `<button class="btn btn-sm btn-outline ${editCls}-down-btn" data-id="${item.id}">⬇</button>` : ''}
+      <button class="btn btn-sm btn-outline ${editCls}-btn" data-id="${item.id}">✏️</button>
+      <button class="btn btn-sm btn-danger ${delCls}-btn" data-id="${item.id}">🗑️</button>
+    </div>`;
+    html += '</div>';
+    return html;
+  }).join('');
+}
+
+function renderExperience() {
+  const campus = appData.campusExperience || [];
+  renderTimeline('campusTimeline', campus,
+    ['startDate','endDate','title','organization','description'], 'edit-campus', 'del-campus');
+  const internship = appData.internship || [];
+  renderTimeline('internshipTimeline', internship,
+    ['startDate','endDate','position','company','description'], 'edit-intern', 'del-intern');
+  const edu = appData.education || [];
+  const eduContainer = document.getElementById('educationTimeline');
+  if(!edu.length) { eduContainer.innerHTML='<p style="color:var(--text-hint);">暂无</p>'; return; }
+  eduContainer.innerHTML = edu.map(e => {
+    let html = `<div class="timeline-item">
+      <div class="timeline-date">${escapeHtml(e.startDate)} — ${escapeHtml(e.endDate)}</div>
+      <div class="timeline-title">${escapeHtml(e.school)}</div>
+      <div class="timeline-subtitle">${escapeHtml(e.major)} · ${escapeHtml(e.degree)}</div>`;
+    if(isAdminMode) html += `<div class="edit-actions">
+      <button class="btn btn-sm btn-outline edit-edu-btn" data-id="${e.id}">✏️</button>
+      <button class="btn btn-sm btn-danger del-edu-btn" data-id="${e.id}">🗑️</button>
+    </div>`;
+    html += '</div>';
+    return html;
+  }).join('');
+}
+
+/* ================================================================
+   渲染：联系（被 renderHero 调用）
+   ================================================================ */
+function renderContact() {
+  const cards = document.getElementById('contactCards');
+  if(!cards) return;
+  const items = (appData.contact && appData.contact.items) ? appData.contact.items : [];
+  if(!items.length) { cards.innerHTML='<p style="color:var(--text-hint);">暂无联系信息</p>'; return; }
+  cards.innerHTML = items.map(item => {
+    const isLink = item.link && (item.link.startsWith('http')||item.link.startsWith('mailto'));
+    const tag = isLink ? 'a' : 'div';
+    let html = `<${tag} class="contact-card" ${isLink ? `href="${escapeHtml(item.link)}" target="_blank" rel="noopener"` : ''}>
+      <div class="contact-icon">${item.icon||'🔗'}</div>
+      <div><div class="contact-label">${escapeHtml(item.label)}</div><div class="contact-value">${escapeHtml(item.value)}</div></div>
+    </${tag}>`;
+    if(isAdminMode) html += `<div class="edit-actions" style="position:absolute;bottom:6px;right:8px;">
+      <button class="btn btn-sm btn-outline edit-contact-item-btn" data-id="${item.id}">✏️</button>
+      <button class="btn btn-sm btn-danger del-contact-item-btn" data-id="${item.id}">🗑️</button>
+    </div>`;
+    return html;
+  }).join('');
+}
+
+/* ================================================================
+   渲染全部
+   ================================================================ */
+function renderAll() {
+  renderHero();
+  renderSkills();
+  renderProjects(document.getElementById('searchInput')?.value || '');
+  renderExperience();
+  renderAbout();
+  renderContact();
+}
+
+/* ================================================================
+   全屏图片查看
+   ================================================================ */
+function showFullscreenImage(src, allImages) {
+  let idx = allImages.indexOf(src);
+  if(idx < 0) idx = 0;
+
+  const overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;z-index:999;background:rgba(20,12,8,0.88);overflow:hidden;';
+  overlay.innerHTML = `<button id="fsClose" style="position:absolute;top:16px;right:16px;width:40px;height:40px;border-radius:50%;border:none;background:rgba(255,255,255,0.12);color:#fff;font-size:20px;cursor:pointer;z-index:30;">✕</button>
+    <div id="fsCounter" style="position:absolute;bottom:20px;left:50%;transform:translateX(-50%);color:rgba(255,255,255,0.5);font-size:13px;z-index:30;">${idx+1} / ${allImages.length}</div>
+    <div id="fsDots" style="position:absolute;bottom:44px;left:50%;transform:translateX(-50%);display:flex;gap:8px;z-index:30;"></div>
+    <div id="fsTrack" style="position:relative;width:100%;height:100vh;"></div>`;
+
+  document.body.appendChild(overlay);
+
+  const track = overlay.querySelector('#fsTrack');
+  const dotContainer = overlay.querySelector('#fsDots');
+
+  // 创建卡片
+  allImages.forEach((img, i) => {
+    const card = document.createElement('div');
+    card.style.cssText = 'position:absolute;top:50%;left:50%;width:70%;max-width:900px;border-radius:10px;overflow:visible;cursor:pointer;transition:all 0.45s cubic-bezier(0.25,0.46,0.45,0.94);';
+    card.innerHTML = `<img src="${img}" style="width:100%;display:block;max-height:75vh;object-fit:contain;border-radius:10px;box-shadow:0 4px 40px rgba(0,0,0,0.5);">`;
+    track.appendChild(card);
+
+    const dot = document.createElement('button');
+    dot.style.cssText = 'width:8px;height:8px;border-radius:50%;border:none;background:rgba(255,255,255,0.3);cursor:pointer;transition:all 0.2s;';
+    dot.dataset.index = i;
+    dotContainer.appendChild(dot);
+  });
+
+  const cards = track.querySelectorAll('div');
+  const dots = dotContainer.querySelectorAll('button');
+  let canSwitch = true;
+
+  function updateFS() {
+    cards.forEach((card, i) => {
+      const offset = i - idx;
+      const abs = Math.abs(offset);
+      const x = offset * 28;
+      const scale = Math.max(0.45, 1 - abs * 0.2);
+      const opacity = Math.max(0.08, 1 - abs * 0.26);
+      card.style.transform = `translate(-50%,-50%) translateX(${x}%) scale(${scale})`;
+      card.style.opacity = opacity;
+      card.style.zIndex = 10 - abs;
+      card.style.pointerEvents = abs <= 2 ? 'auto' : 'none';
+    });
+    dots.forEach((d,i) => { d.classList.toggle('active', i===idx); d.style.background = i===idx ? '#fff' : 'rgba(255,255,255,0.3)'; });
+    overlay.querySelector('#fsCounter').textContent = `${idx+1} / ${allImages.length}`;
+  }
+  updateFS();
+
+  // 悬浮切换
+  cards.forEach((card, i) => {
+    card.addEventListener('mouseenter', () => {
+      if(!canSwitch || i===idx) return;
+      canSwitch = false; idx = i; updateFS();
+      setTimeout(()=> canSwitch=true, 350);
+    });
+  });
+
+  // 滚轮
+  overlay.addEventListener('wheel', e => {
+    e.preventDefault();
+    if(allImages.length <= 1) return;
+    if(e.deltaY > 0) idx = (idx+1) % allImages.length;
+    else idx = (idx-1+allImages.length) % allImages.length;
+    updateFS();
+  }, {passive:false});
+
+  // 键盘
+  function keyH(e) {
+    if(e.key==='Escape') close();
+    if(e.key==='ArrowRight'){ idx=(idx+1)%allImages.length; updateFS(); }
+    if(e.key==='ArrowLeft'){ idx=(idx-1+allImages.length)%allImages.length; updateFS(); }
+  }
+  document.addEventListener('keydown', keyH);
+
+  function close() {
+    overlay.remove();
+    document.removeEventListener('keydown', keyH);
+  }
+  overlay.querySelector('#fsClose').addEventListener('click', e => { e.stopPropagation(); close(); });
+}
+
+/* ================================================================
+   项目详情弹窗
+   ================================================================ */
+function openProjectDetail(id) {
+  const proj = (appData.projects||[]).find(p => p.id === id);
+  if(!proj) return;
+  const existing = document.querySelector('.modal-overlay');
+  if(existing) existing.remove();
+
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+
+  const hasImages = proj.images && proj.images.length>0;
+  const imgs = proj.images || [];
+  let carouselHtml;
+  if(hasImages) {
+    const imgCards = imgs.map((img,i) => `<div class="carousel-card" data-index="${i}" style="opacity:0;pointer-events:none;"><img src="${img}" alt="${escapeHtml(proj.name)} 图${i+1}"></div>`).join('');
+    const dotsHtml = imgs.map((_,i) => `<button class="carousel-dot${i===0?' active':''}" data-index="${i}"></button>`).join('');
+    carouselHtml = `<div class="carousel">
+      <div class="carousel-track" id="carouselTrack">
+        ${imgCards}
+      </div>
+      ${imgs.length>1 ? `
+        <button class="carousel-btn prev" id="carouselPrev">◀</button>
+        <button class="carousel-btn next" id="carouselNext">▶</button>
+        <div class="carousel-dots" id="carouselDots">${dotsHtml}</div>
+      ` : ''}
+    </div>`;
+  } else {
+    carouselHtml = `<div class="carousel"><div class="carousel-placeholder">💼</div></div>`;
+  }
+
+  overlay.innerHTML = `<div class="modal">
+    <button class="modal-close" id="modalClose">✕</button>
+    ${carouselHtml}
+    <div class="modal-title">${escapeHtml(proj.name)}</div>
+    <div class="tag-group" style="margin-bottom:12px;">${(proj.tags||[]).map(t=>`<span class="tag">${escapeHtml(t)}</span>`).join('')}</div>
+    <p style="font-size:14px;color:var(--text-secondary);line-height:1.8;white-space:pre-line;">${escapeHtml(proj.description)}</p>
+    ${proj.date ? `<p style="margin-top:10px;font-size:12px;color:var(--text-hint);">📅 ${escapeHtml(proj.date)}</p>` : ''}
+    ${proj.link ? `<p style="margin-top:8px;">🔗 <a href="${escapeHtml(proj.link)}" target="_blank" rel="noopener" style="color:var(--matcha);">${escapeHtml(proj.link)}</a></p>` : ''}
+  </div>`;
+  document.body.appendChild(overlay);
+
+  overlay.querySelector('#modalClose').addEventListener('click', ()=>overlay.remove());
+  overlay.addEventListener('click', e => { if(e.target===overlay) overlay.remove(); });
+  document.addEventListener('keydown', function escHandler(e) { if(e.key==='Escape'){ overlay.remove(); document.removeEventListener('keydown',escHandler); } });
+
+  // Apple Cover Flow 轮播
+  if(hasImages && imgs.length >= 1) {
+    let currentIdx = 0;
+    const cards = overlay.querySelectorAll('.carousel-card');
+    const dots = overlay.querySelectorAll('.carousel-dot');
+    let canSwitch = true;
+
+    function updateCoverFlow() {
+      cards.forEach((card, i) => {
+        const offset = i - currentIdx; // 相对中心的距离
+        const absOffset = Math.abs(offset);
+
+        // 左右各2张可见，间距紧凑
+        const xShift = offset * 24; // 每张偏移 24%
+        const scale = Math.max(0.5, 1 - absOffset * 0.18);
+        const opacity = Math.max(0.15, 1 - absOffset * 0.22);
+        const zIndex = 10 - absOffset;
+
+        card.style.transform = `translate(-50%, -50%) translateX(${xShift}%) scale(${scale})`;
+        card.style.opacity = opacity;
+        card.style.zIndex = zIndex;
+        card.style.pointerEvents = absOffset <= 3 ? 'auto' : 'none';
+      });
+      dots.forEach((d,i) => d.classList.toggle('active', i===currentIdx));
+    }
+
+    updateCoverFlow();
+
+    // 悬浮切换 + 点击放大
+    cards.forEach((card, i) => {
+      card.addEventListener('mouseenter', function() {
+        if(!canSwitch || i === currentIdx) return;
+        canSwitch = false;
+        currentIdx = i;
+        updateCoverFlow();
+        setTimeout(()=>{ canSwitch = true; }, 400);
+      });
+      // 点击中间图 → 全屏放大
+      card.addEventListener('click', function(e) {
+        if(i !== currentIdx) return; // 只有当前图响应点击
+        e.stopPropagation();
+        showFullscreenImage(imgs[currentIdx], imgs);
+      });
+    });
+
+    // ◀ ▶ 按钮
+    overlay.querySelector('#carouselPrev').addEventListener('click', ()=>{
+      currentIdx = (currentIdx - 1 + imgs.length) % imgs.length;
+      updateCoverFlow();
+    });
+    overlay.querySelector('#carouselNext').addEventListener('click', ()=>{
+      currentIdx = (currentIdx + 1) % imgs.length;
+      updateCoverFlow();
+    });
+    // 圆点
+    dots.forEach(dot => {
+      dot.addEventListener('click', function(){
+        currentIdx = parseInt(this.dataset.index);
+        updateCoverFlow();
+      });
+    });
+  }
+}
+
+/* ================================================================
+   表单弹窗
+   ================================================================ */
+function compressImage(file, maxW, quality) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const img = new Image();
+      img.onload = () => {
+        let w=img.width, h=img.height;
+        if(w>maxW){ h=Math.round(h*maxW/w); w=maxW; }
+        const c=document.createElement('canvas'); c.width=w; c.height=h;
+        c.getContext('2d').drawImage(img,0,0,w,h);
+        resolve(c.toDataURL('image/jpeg',quality));
+      };
+      img.src = e.target.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+function showFormModal(title, fields, onSubmit) {
+  const existing = document.querySelector('.admin-form-modal');
+  if(existing) existing.remove();
+
+  const overlay = document.createElement('div');
+  overlay.className = 'admin-form-modal';
+
+  let fieldsHtml = fields.map(f => {
+    if(f.type==='textarea') return `<div class="form-group"><label>${f.label}</label><textarea class="form-textarea" id="field_${f.key}" placeholder="${f.placeholder||''}">${escapeHtml(f.value||'')}</textarea></div>`;
+    if(f.type==='image') return `<div class="form-group"><label>${f.label}</label><div class="upload-area" id="field_${f.key}_area"><span>📷 点击上传（自动压缩）</span><input type="file" accept="image/*" id="field_${f.key}_input" style="display:none;">${f.value?`<img class="upload-preview" src="${f.value}" alt="预览">`:''}</div></div>`;
+    if(f.type==='tags') return `<div class="form-group"><label>${f.label}</label><input class="form-input" id="field_${f.key}" placeholder="${f.placeholder||'逗号分隔'}" value="${escapeHtml((f.value||[]).join(', '))}"></div>`;
+    return `<div class="form-group"><label>${f.label}</label><input class="form-input" id="field_${f.key}" placeholder="${f.placeholder||''}" value="${escapeHtml(f.value||'')}"></div>`;
+  }).join('');
+
+  overlay.innerHTML = `<div class="admin-form">
+    <button class="admin-form-close" id="afClose">✕</button>
+    <h3>${title}</h3>${fieldsHtml}
+    <div class="form-actions">
+      <button class="btn btn-outline" id="afCancel">取消</button>
+      <button class="btn btn-primary" id="afSave">💾 保存</button>
+    </div>
+  </div>`;
+  document.body.appendChild(overlay);
+
+  function close(){ overlay.remove(); }
+  overlay.querySelector('#afClose').addEventListener('click',close);
+  overlay.querySelector('#afCancel').addEventListener('click',close);
+  overlay.addEventListener('click',e=>{ if(e.target===overlay) close(); });
+
+  fields.filter(f=>f.type==='image').forEach(f=>{
+    const area = overlay.querySelector('#field_'+f.key+'_area');
+    const input = overlay.querySelector('#field_'+f.key+'_input');
+    area.addEventListener('click',()=>input.click());
+    input.addEventListener('change',async function(){
+      if(!this.files[0]) return;
+      const b64 = await compressImage(this.files[0], 800, 0.7);
+      f._uploaded = b64;
+      const prev = area.querySelector('.upload-preview');
+      if(prev) prev.src = b64;
+      else { const img=document.createElement('img'); img.className='upload-preview'; img.src=b64; area.appendChild(img); }
+    });
+  });
+
+  overlay.querySelector('#afSave').addEventListener('click',()=>{
+    const vals = {};
+    fields.forEach(f => {
+      if(f.type==='image') vals[f.key] = f._uploaded || f.value || '';
+      else if(f.type==='tags') vals[f.key] = overlay.querySelector('#field_'+f.key).value.split(/[,，]/).map(s=>s.trim()).filter(Boolean);
+      else vals[f.key] = overlay.querySelector('#field_'+f.key).value;
+    });
+    close();
+    onSubmit(vals);
+  });
+
+  document.addEventListener('keydown', function escH(e){ if(e.key==='Escape'){ close(); document.removeEventListener('keydown',escH); } });
+}
+
+/* ================================================================
+   编辑函数
+   ================================================================ */
+function editProfile() {
+  showFormModal('编辑个人资料', [
+    { key:'name', label:'姓名', value:appData.profile.name },
+    { key:'title', label:'求职意向/头衔', value:appData.profile.title },
+    { key:'photo', label:'个人照片', type:'image', value:appData.profile.photo },
+    { key:'banner', label:'头像背景板（可选）', type:'image', value:appData.profile.banner||'' },
+    { key:'heroVideo', label:'背景视频（文件名或链接，留空取消）', value:appData.profile.heroVideo||'' },
+    { key:'location', label:'所在地', value:appData.profile.location||'' },
+    { key:'experience', label:'工作年限/学历', value:appData.profile.experience||'' },
+    { key:'status', label:'求职状态', value:appData.profile.status||'' },
+    { key:'bio', label:'个人简介', type:'textarea', value:appData.profile.bio },
+    { key:'hobbies', label:'爱好（逗号分隔）', type:'tags', value:appData.profile.hobbies||[] },
+  ], vals => {
+    appData.profile.name = vals.name;
+    appData.profile.title = vals.title;
+    appData.profile.photo = vals.photo;
+    appData.profile.banner = vals.banner;
+    appData.profile.heroVideo = vals.heroVideo;
+    appData.profile.location = vals.location;
+    appData.profile.experience = vals.experience;
+    appData.profile.status = vals.status;
+    appData.profile.bio = vals.bio;
+    appData.profile.hobbies = vals.hobbies;
+    saveAndRefresh();
+  });
+}
+
+function editSkill(id) {
+  const idx = appData.skills.findIndex(s=>s.id===id);
+  const sk = idx>=0 ? appData.skills[idx] : {};
+  const currentIcon = sk.icon || '';
+  const isImgIcon = currentIcon && currentIcon.startsWith('data:');
+
+  const overlay = document.createElement('div');
+  overlay.className = 'admin-form-modal';
+  overlay.innerHTML = `<div class="admin-form">
+    <button class="admin-form-close" id="skClose">✕</button>
+    <h3>${idx>=0?'编辑技能':'添加技能'}</h3>
+    <div class="form-group"><label>图标</label>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <div id="skIconPreview" style="width:48px;height:48px;border-radius:10px;border:2px dashed var(--coffee-pale);display:flex;align-items:center;justify-content:center;font-size:${isImgIcon?'0':'28px'};overflow:hidden;background:var(--cream-dark);">${isImgIcon ? `<img src="${currentIcon}" style="width:100%;height:100%;object-fit:cover;">` : (currentIcon||'📷')}</div>
+        <div>
+          <input class="form-input" id="skIconText" placeholder="输入 emoji 如 🤖" value="${isImgIcon?'':currentIcon}" style="width:160px;margin-bottom:4px;">
+          <button class="btn btn-sm btn-outline" id="skIconUpload">📷 上传图片</button>
+        </div>
+      </div>
+    </div>
+    <div class="form-group"><label>技能名称</label><input class="form-input" id="skName" value="${escapeHtml(sk.name||'')}"></div>
+    <div class="form-group"><label>分类</label><input class="form-input" id="skCat" value="${escapeHtml(sk.category||'')}"></div>
+    <div class="form-actions">
+      <button class="btn btn-outline" id="skCancel">取消</button>
+      <button class="btn btn-primary" id="skSave">💾 保存</button>
+    </div>
+  </div>`;
+  document.body.appendChild(overlay);
+
+  let iconData = currentIcon;
+
+  function updatePreview() {
+    const preview = overlay.querySelector('#skIconPreview');
+    if(iconData.startsWith('data:')) {
+      preview.innerHTML = `<img src="${iconData}" style="width:100%;height:100%;object-fit:cover;">`;
+      preview.style.fontSize = '0';
+    } else {
+      preview.innerHTML = iconData || '📷';
+      preview.style.fontSize = '28px';
+    }
+  }
+
+  overlay.querySelector('#skIconUpload').addEventListener('click', () => {
+    const inp = document.createElement('input');
+    inp.type = 'file'; inp.accept = 'image/*';
+    inp.onchange = async function() {
+      if(!this.files[0]) return;
+      iconData = await compressImage(this.files[0], 120, 0.8);
+      overlay.querySelector('#skIconText').value = '';
+      updatePreview();
+    };
+    inp.click();
+  });
+
+  overlay.querySelector('#skIconText').addEventListener('input', function() {
+    if(this.value) { iconData = this.value; updatePreview(); }
+  });
+
+  function close(){ overlay.remove(); }
+  overlay.querySelector('#skClose').addEventListener('click',close);
+  overlay.querySelector('#skCancel').addEventListener('click',close);
+  overlay.addEventListener('click',e=>{ if(e.target===overlay) close(); });
+
+  overlay.querySelector('#skSave').addEventListener('click', () => {
+    const updated = {
+      icon: iconData,
+      name: overlay.querySelector('#skName').value,
+      category: overlay.querySelector('#skCat').value
+    };
+    if(idx>=0) Object.assign(appData.skills[idx], updated);
+    else appData.skills.push({id:genId(),...updated});
+    close();
+    saveAndRefresh();
+  });
+}
+function deleteSkill(id) { if(!confirm('确定删除？'))return; appData.skills=appData.skills.filter(s=>s.id!==id); saveAndRefresh(); }
+
+function editContactSimple() {
+  if(!appData.contact.items) appData.contact.items = [];
+  const overlay = document.createElement('div');
+  overlay.className = 'admin-form-modal';
+  function buildList() {
+    const items = appData.contact.items;
+    return items.length === 0
+      ? '<p style="color:var(--text-hint);text-align:center;padding:12px;">暂无联系方式</p>'
+      : items.map((item, i) => `<div style="display:flex;align-items:center;gap:10px;padding:8px 12px;margin-bottom:6px;background:var(--cream-dark);border-radius:8px;">
+        <span style="font-size:22px;">${item.icon||'🔗'}</span>
+        <div style="flex:1;"><div style="font-weight:600;font-size:14px;">${escapeHtml(item.label)}</div><div style="font-size:12px;color:var(--text-hint);">${escapeHtml(item.value)}</div></div>
+        <button class="btn btn-sm btn-outline edit-contact-edit-btn" data-idx="${i}">✏️</button>
+        <button class="btn btn-sm btn-danger edit-contact-del-btn" data-idx="${i}">🗑️</button>
+      </div>`).join('');
+  }
+  overlay.innerHTML = `<div class="admin-form" style="max-width:500px;">
+    <button class="admin-form-close" id="ctClose">✕</button>
+    <h3>✏️ 编辑联系方式</h3>
+    <div id="ctList" style="max-height:360px;overflow-y:auto;margin-bottom:12px;">${buildList()}</div>
+    <div class="form-actions" style="justify-content:space-between;">
+      <button class="btn btn-outline" id="ctAdd">➕ 添加</button>
+      <button class="btn btn-outline" id="ctCancel">取消</button>
+      <button class="btn btn-primary" id="ctDone">完成</button>
+    </div>
+  </div>`;
+  document.body.appendChild(overlay);
+
+  function close(){ overlay.remove(); renderAll(); }
+  overlay.querySelector('#ctClose').addEventListener('click',close);
+  overlay.querySelector('#ctCancel').addEventListener('click',close);
+  overlay.querySelector('#ctDone').addEventListener('click',close);
+  overlay.addEventListener('click',e=>{ if(e.target===overlay) close(); });
+
+  // 编辑单条
+  overlay.querySelectorAll('.edit-contact-edit-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const idx = parseInt(this.dataset.idx);
+      const item = appData.contact.items[idx];
+      showFormModal('编辑联系方式', [
+        { key:'icon', label:'图标(emoji)', value:item.icon||'🔗' },
+        { key:'label', label:'名称（如：邮箱、微信、GitHub）', value:item.label||'' },
+        { key:'value', label:'账号/地址', value:item.value||'' },
+        { key:'link', label:'链接（可选，如 mailto:xxx 或 https://...）', value:item.link||'' },
+      ], vals => {
+        Object.assign(appData.contact.items[idx], vals);
+        saveAndRefresh();
+        overlay.remove();
+        editContactSimple();
+      });
+    });
+  });
+
+  // 删除
+  overlay.querySelectorAll('.edit-contact-del-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      if(!confirm('确定删除？')) return;
+      appData.contact.items.splice(parseInt(this.dataset.idx), 1);
+      saveAndRefresh();
+      overlay.remove();
+      editContactSimple();
+    });
+  });
+
+  // 添加
+  overlay.querySelector('#ctAdd').addEventListener('click', () => {
+    showFormModal('添加联系方式', [
+      { key:'icon', label:'图标(emoji)', value:'🔗' },
+      { key:'label', label:'名称（如：邮箱、微信、GitHub）', value:'' },
+      { key:'value', label:'账号/地址', value:'' },
+      { key:'link', label:'链接（可选）', value:'' },
+    ], vals => {
+      appData.contact.items.push({ id:genId(), ...vals });
+      saveAndRefresh();
+      overlay.remove();
+      editContactSimple();
+    });
+  });
+}
+
+function editCampusExperience(id) {
+  const arr = appData.campusExperience || [];
+  const idx = arr.findIndex(e=>e.id===id);
+  const item = idx>=0 ? arr[idx] : {};
+  showFormModal(idx>=0?'编辑在校经历':'添加在校经历', [
+    { key:'title', label:'项目/活动名称', value:item.title||'' },
+    { key:'organization', label:'角色/组织', value:item.organization||'' },
+    { key:'description', label:'详细描述', type:'textarea', value:item.description||'' },
+    { key:'startDate', label:'开始时间', value:item.startDate||'' },
+    { key:'endDate', label:'结束时间', value:item.endDate||'' },
+    { key:'image', label:'展示图片（可选）', type:'image', value:item.image||'' },
+  ], vals => {
+    if(idx>=0) Object.assign(arr[idx], vals);
+    else arr.push({id:genId(),...vals,image:''});
+    if(!appData.campusExperience) appData.campusExperience = arr;
+    saveAndRefresh();
+  });
+}
+function deleteCampusExperience(id) { if(!confirm('确定删除？'))return; appData.campusExperience=(appData.campusExperience||[]).filter(e=>e.id!==id); saveAndRefresh(); }
+function moveCampusUp(id) { swapAdjacent(appData.campusExperience, id, -1); saveAndRefresh(); }
+function moveCampusDown(id) { swapAdjacent(appData.campusExperience, id, 1); saveAndRefresh(); }
+
+function deleteInternship(id) { if(!confirm('确定删除？'))return; appData.internship=(appData.internship||[]).filter(e=>e.id!==id); saveAndRefresh(); }
+function moveInternUp(id) { swapAdjacent(appData.internship, id, -1); saveAndRefresh(); }
+function moveInternDown(id) { swapAdjacent(appData.internship, id, 1); saveAndRefresh(); }
+
+function deleteEducation(id) { if(!confirm('确定删除？'))return; appData.education=(appData.education||[]).filter(e=>e.id!==id); saveAndRefresh(); }
+function moveEduUp(id) { swapAdjacent(appData.education, id, -1); saveAndRefresh(); }
+function moveEduDown(id) { swapAdjacent(appData.education, id, 1); saveAndRefresh(); }
+
+function swapAdjacent(arr, id, dir) {
+  if(!arr) return;
+  const idx = arr.findIndex(e=>e.id===id);
+  if(idx<0 || idx+dir<0 || idx+dir>=arr.length) return;
+  [arr[idx], arr[idx+dir]] = [arr[idx+dir], arr[idx]];
+}
+
+function editInternship(id) {
+  const arr = appData.internship || [];
+  const idx = arr.findIndex(e=>e.id===id);
+  const item = idx>=0 ? arr[idx] : {};
+  showFormModal(idx>=0?'编辑实习经历':'添加实习经历', [
+    { key:'company', label:'公司名称', value:item.company||'' },
+    { key:'position', label:'职位', value:item.position||'' },
+    { key:'description', label:'职责描述', type:'textarea', value:item.description||'' },
+    { key:'startDate', label:'开始时间', value:item.startDate||'' },
+    { key:'endDate', label:'结束时间', value:item.endDate||'' },
+    { key:'image', label:'展示图片（可选）', type:'image', value:item.image||'' },
+  ], vals => {
+    if(idx>=0) Object.assign(arr[idx], vals);
+    else arr.push({id:genId(),...vals,image:''});
+    if(!appData.internship) appData.internship = arr;
+    saveAndRefresh();
+  });
+}
+function deleteInternship(id) { if(!confirm('确定删除？'))return; appData.internship=(appData.internship||[]).filter(e=>e.id!==id); saveAndRefresh(); }
+
+function deleteExperience(id) { if(!confirm('确定删除？'))return; appData.experience=(appData.experience||[]).filter(e=>e.id!==id); saveAndRefresh(); }
+
+function editEducation(id) {
+  const idx = appData.education.findIndex(e=>e.id===id);
+  const edu = idx>=0 ? appData.education[idx] : {};
+  showFormModal(idx>=0?'编辑教育经历':'添加教育经历', [
+    { key:'school', label:'学校名称', value:edu.school||'' },
+    { key:'major', label:'专业', value:edu.major||'' },
+    { key:'degree', label:'学历', value:edu.degree||'' },
+    { key:'startDate', label:'开始时间', value:edu.startDate||'' },
+    { key:'endDate', label:'结束时间', value:edu.endDate||'' },
+  ], vals => {
+    if(idx>=0) Object.assign(appData.education[idx], vals);
+    else appData.education.push({id:genId(),...vals});
+    saveAndRefresh();
+  });
+}
+function deleteEducation(id) { if(!confirm('确定删除？'))return; appData.education=appData.education.filter(e=>e.id!==id); saveAndRefresh(); }
+
+function editProject(id) {
+  const idx = appData.projects.findIndex(p=>p.id===id);
+  const proj = idx>=0 ? appData.projects[idx] : {};
+  const images = proj.images || [];
+  // 用自定义弹窗，因为需要多图上传
+  const overlay = document.createElement('div');
+  overlay.className = 'admin-form-modal';
+  overlay.innerHTML = `<div class="admin-form">
+    <button class="admin-form-close" id="afClose">✕</button>
+    <h3>${idx>=0?'编辑项目':'添加项目'}</h3>
+    <div class="form-group"><label>项目名称</label><input class="form-input" id="af_name" value="${escapeHtml(proj.name||'')}"></div>
+    <div class="form-group"><label>项目描述</label><textarea class="form-textarea" id="af_desc">${escapeHtml(proj.description||'')}</textarea></div>
+    <div class="form-group"><label>项目分类</label><input class="form-input" id="af_cat" value="${escapeHtml(proj.category||'')}" placeholder="如：工作项目 / 个人项目"></div>
+    <div class="form-group"><label>技术标签（逗号分隔）</label><input class="form-input" id="af_tags" value="${escapeHtml((proj.tags||[]).join(', '))}"></div>
+    <div class="form-group"><label>项目链接（可选）</label><input class="form-input" id="af_link" value="${escapeHtml(proj.link||'')}"></div>
+    <div class="form-group"><label>项目时间</label><input class="form-input" id="af_date" value="${escapeHtml(proj.date||'')}"></div>
+    <div class="form-group">
+      <label>项目图片</label>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;" id="af_imgPreview">
+        ${images.map((img,i)=>`<div style="position:relative;width:80px;height:80px;border-radius:6px;overflow:hidden;border:1px solid var(--coffee-pale);">
+          <img src="${img}" style="width:100%;height:100%;object-fit:cover;">
+          <button data-idx="${i}" class="af-img-del-btn" style="position:absolute;top:1px;right:1px;width:18px;height:18px;border-radius:50%;border:none;background:var(--red);color:#fff;font-size:10px;cursor:pointer;">✕</button>
+        </div>`).join('')}
+      </div>
+      <div class="upload-area" id="af_uploadBtn"><span>📷 点击上传图片（可多选，自动压缩）</span><input type="file" accept="image/*" id="af_uploadInput" style="display:none;" multiple></div>
+      <div id="af_uploadMsg" style="font-size:12px;color:var(--text-hint);margin-top:4px;"></div>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-outline" id="afCancel">取消</button>
+      <button class="btn btn-primary" id="afSave">💾 保存</button>
+    </div>
+  </div>`;
+  document.body.appendChild(overlay);
+
+  // 当前图片列表
+  let currentImages = [...images];
+
+  function close(){ overlay.remove(); }
+  overlay.querySelector('#afClose').addEventListener('click',close);
+  overlay.querySelector('#afCancel').addEventListener('click',close);
+  overlay.addEventListener('click',e=>{ if(e.target===overlay) close(); });
+
+  // 刷新图片预览（就地更新，不重开弹窗）
+  function refreshProjectImgPreview() {
+    const preview = overlay.querySelector('#af_imgPreview');
+    preview.innerHTML = currentImages.map((img,i)=>`<div style="position:relative;width:80px;height:80px;border-radius:6px;overflow:hidden;border:1px solid var(--coffee-pale);">
+      <img src="${img}" style="width:100%;height:100%;object-fit:cover;">
+      <button data-idx="${i}" class="af-img-del-btn" style="position:absolute;top:1px;right:1px;width:18px;height:18px;border-radius:50%;border:none;background:var(--red);color:#fff;font-size:10px;cursor:pointer;">✕</button>
+    </div>`).join('');
+    preview.querySelectorAll('.af-img-del-btn').forEach(btn=>{
+      btn.addEventListener('click',function(){
+        currentImages.splice(parseInt(this.dataset.idx),1);
+        refreshProjectImgPreview();
+      });
+    });
+  }
+
+  // 删除已有图片
+  overlay.querySelectorAll('.af-img-del-btn').forEach(btn=>{
+    btn.addEventListener('click',function(){
+      currentImages.splice(parseInt(this.dataset.idx),1);
+      refreshProjectImgPreview();
+    });
+  });
+
+  // 上传新图片
+  const uploadInput = overlay.querySelector('#af_uploadInput');
+  overlay.querySelector('#af_uploadBtn').addEventListener('click',()=>uploadInput.click());
+  uploadInput.addEventListener('change',async function(){
+    const files = Array.from(this.files);
+    overlay.querySelector('#af_uploadMsg').textContent = '压缩中...';
+    for(const f of files) {
+      currentImages.push(await compressImage(f, 2400, 0.92));
+    }
+    overlay.querySelector('#af_uploadMsg').textContent = '✅ 已添加 '+files.length+' 张';
+    refreshProjectImgPreview();
+    this.value = '';
+  });
+
+  // 保存
+  overlay.querySelector('#afSave').addEventListener('click',()=>{
+    const vals = {
+      name: overlay.querySelector('#af_name').value,
+      description: overlay.querySelector('#af_desc').value,
+      category: overlay.querySelector('#af_cat').value,
+      tags: overlay.querySelector('#af_tags').value.split(/[,，]/).map(s=>s.trim()).filter(Boolean),
+      link: overlay.querySelector('#af_link').value,
+      date: overlay.querySelector('#af_date').value,
+      images: currentImages
+    };
+    if(idx>=0) Object.assign(appData.projects[idx], {...vals, featured:appData.projects[idx].featured||false});
+    else appData.projects.push({id:genId(),...vals,featured:false});
+    close();
+    saveAndRefresh();
+  });
+}
+function deleteProject(id) { if(!confirm('确定删除？'))return; appData.projects=appData.projects.filter(p=>p.id!==id); saveAndRefresh(); }
+function toggleProjectSize(id) {
+  const proj = appData.projects.find(p=>p.id===id);
+  if(!proj) return;
+  const sizes = ['small','medium','large'];
+  const idx = sizes.indexOf(proj.size||'medium');
+  proj.size = sizes[(idx+1)%3];
+  saveAndRefresh();
+}
+function moveProjectUp(id) { swapAdjacent(appData.projects, id, -1); saveAndRefresh(); }
+function moveProjectDown(id) { swapAdjacent(appData.projects, id, 1); saveAndRefresh(); }
+
+function manageProjectImages(pid) {
+  const proj = appData.projects.find(p=>p.id===pid);
+  if(!proj) return;
+  const overlay = document.createElement('div');
+  overlay.className = 'admin-form-modal';
+  overlay.innerHTML = `<div class="admin-form">
+    <button class="admin-form-close" id="imgClose">✕</button>
+    <h3>📷 管理图片 — ${escapeHtml(proj.name)}</h3>
+    <div id="imgMgrList" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;">${(proj.images||[]).map((img,i)=>`
+      <div style="position:relative;width:90px;height:90px;border-radius:8px;overflow:hidden;">
+        <img src="${img}" style="width:100%;height:100%;object-fit:cover;">
+        <button data-idx="${i}" class="img-del-btn" style="position:absolute;top:2px;right:2px;width:20px;height:20px;border-radius:50%;border:none;background:var(--red);color:#fff;font-size:10px;cursor:pointer;">✕</button>
+      </div>`).join('')}${(proj.images||[]).length===0?'<p style="color:var(--text-hint);">暂无图片</p>':''}</div>
+    <div class="upload-area" id="imgUploadArea"><span>📷 点击上传新图片</span><input type="file" accept="image/*" id="imgUploadInput" style="display:none;" multiple></div>
+    <div id="imgProgress" style="margin-top:8px;font-size:12px;color:var(--text-hint);"></div>
+    <div class="form-actions"><button class="btn btn-outline" id="imgDone">完成</button></div>
+  </div>`;
+  document.body.appendChild(overlay);
+
+  function close(){ overlay.remove(); renderAll(); }
+  overlay.querySelector('#imgClose').addEventListener('click',close);
+  overlay.querySelector('#imgDone').addEventListener('click',close);
+  overlay.addEventListener('click',e=>{ if(e.target===overlay) close(); });
+
+  // 删除图片 — 就地更新，不关弹窗
+  function refreshImageList() {
+    const list = overlay.querySelector('#imgMgrList');
+    if(!list) return;
+    const imgs = proj.images || [];
+    list.innerHTML = imgs.length === 0
+      ? '<p style="color:var(--text-hint);">暂无图片</p>'
+      : imgs.map((img,i) => `<div style="position:relative;width:90px;height:90px;border-radius:8px;overflow:hidden;">
+          <img src="${img}" style="width:100%;height:100%;object-fit:cover;">
+          <button data-idx="${i}" class="img-del-btn" style="position:absolute;top:2px;right:2px;width:20px;height:20px;border-radius:50%;border:none;background:var(--red);color:#fff;font-size:10px;cursor:pointer;">✕</button>
+        </div>`).join('');
+    // 重新绑定删除按钮
+    list.querySelectorAll('.img-del-btn').forEach(btn=>{
+      btn.addEventListener('click',async function(){
+        proj.images.splice(parseInt(this.dataset.idx),1);
+        await saveData(appData);
+        refreshImageList();
+      });
+    });
+  }
+
+  overlay.querySelectorAll('.img-del-btn').forEach(btn=>{
+    btn.addEventListener('click',async function(){
+      proj.images.splice(parseInt(this.dataset.idx),1);
+      await saveData(appData);
+      refreshImageList();
+    });
+  });
+
+  const uploadInput = overlay.querySelector('#imgUploadInput');
+  overlay.querySelector('#imgUploadArea').addEventListener('click',()=>uploadInput.click());
+  uploadInput.addEventListener('change',async function(){
+    const files = Array.from(this.files);
+    overlay.querySelector('#imgProgress').textContent = `压缩中...`;
+    for(const f of files) { proj.images.push(await compressImage(f,2400,0.92)); }
+    overlay.querySelector('#imgProgress').textContent = `✅ 已上传 ${files.length} 张`;
+    await saveAndRefresh(); close();
+  });
+}
+
+function editContact() {
+  const socialStr = (appData.contact.social||[]).map(s=>s.platform+': '+s.url).join('\n');
+  showFormModal('编辑联系方式', [
+    { key:'email', label:'邮箱', value:appData.contact.email||'' },
+    { key:'phone', label:'电话', value:appData.contact.phone||'' },
+    { key:'social', label:'社交账号（每行一个：平台名: 链接）', type:'textarea', value:socialStr },
+  ], vals => {
+    appData.contact.email = vals.email;
+    appData.contact.phone = vals.phone;
+    appData.contact.social = vals.social.split('\n').map(line=>{
+      const [platform,...rest]=line.split(':'); return {platform:(platform||'').trim(),url:(rest.join(':')||'').trim()};
+    }).filter(s=>s.platform&&s.url);
+    saveAndRefresh();
+  });
+}
+
+/* ================================================================
+   事件委托（管理按钮）
+   ================================================================ */
+document.addEventListener('click', function(e) {
+  if(!isAdminMode) return;
+
+  // 技能
+  if(e.target.closest('.edit-skill-btn')) { e.stopPropagation(); editSkill(e.target.closest('.edit-skill-btn').dataset.id); }
+  if(e.target.closest('.del-skill-btn')) { e.stopPropagation(); deleteSkill(e.target.closest('.del-skill-btn').dataset.id); }
+
+  // 经历
+  // 校园经历
+  if(e.target.closest('.edit-campus-btn')) { editCampusExperience(e.target.closest('.edit-campus-btn').dataset.id); }
+  if(e.target.closest('.del-campus-btn')) { deleteCampusExperience(e.target.closest('.del-campus-btn').dataset.id); }
+  if(e.target.closest('.edit-campus-up-btn')) { moveCampusUp(e.target.closest('.edit-campus-up-btn').dataset.id); }
+  if(e.target.closest('.edit-campus-down-btn')) { moveCampusDown(e.target.closest('.edit-campus-down-btn').dataset.id); }
+  // 实习经历
+  if(e.target.closest('.edit-intern-btn')) { editInternship(e.target.closest('.edit-intern-btn').dataset.id); }
+  if(e.target.closest('.del-intern-btn')) { deleteInternship(e.target.closest('.del-intern-btn').dataset.id); }
+  if(e.target.closest('.edit-intern-up-btn')) { moveInternUp(e.target.closest('.edit-intern-up-btn').dataset.id); }
+  if(e.target.closest('.edit-intern-down-btn')) { moveInternDown(e.target.closest('.edit-intern-down-btn').dataset.id); }
+  // 教育
+  if(e.target.closest('.edit-edu-btn')) { editEducation(e.target.closest('.edit-edu-btn').dataset.id); }
+  if(e.target.closest('.del-edu-btn')) { deleteEducation(e.target.closest('.del-edu-btn').dataset.id); }
+  if(e.target.closest('.edit-edu-up-btn')) { moveEduUp(e.target.closest('.edit-edu-up-btn').dataset.id); }
+  if(e.target.closest('.edit-edu-down-btn')) { moveEduDown(e.target.closest('.edit-edu-down-btn').dataset.id); }
+  // 联系方式
+  if(e.target.closest('.edit-contact-item-btn')) { e.stopPropagation(); editContactSimple(); }
+  if(e.target.closest('.del-contact-item-btn')) { e.stopPropagation(); editContactSimple(); }
+  // 项目
+  if(e.target.closest('.edit-proj-btn')) { e.stopPropagation(); editProject(e.target.closest('.edit-proj-btn').dataset.id); }
+  if(e.target.closest('.img-proj-btn')) { e.stopPropagation(); manageProjectImages(e.target.closest('.img-proj-btn').dataset.id); }
+  if(e.target.closest('.size-proj-btn')) { e.stopPropagation(); toggleProjectSize(e.target.closest('.size-proj-btn').dataset.id); }
+  if(e.target.closest('.del-proj-btn')) { e.stopPropagation(); deleteProject(e.target.closest('.del-proj-btn').dataset.id); }
+  if(e.target.closest('.edit-proj-up-btn')) { e.stopPropagation(); moveProjectUp(e.target.closest('.edit-proj-up-btn').dataset.id); }
+  if(e.target.closest('.edit-proj-down-btn')) { e.stopPropagation(); moveProjectDown(e.target.closest('.edit-proj-down-btn').dataset.id); }
+});
+
+// 编辑按钮（非列表项）
+document.getElementById('btnEditProfile').addEventListener('click', editProfile);
+document.getElementById('btnEditAbout').addEventListener('click', editProfile);
+document.getElementById('btnEditContact').addEventListener('click', editContactSimple);
+document.getElementById('btnAddSkill').addEventListener('click', ()=>editSkill(null));
+document.getElementById('btnAddCampus').addEventListener('click', ()=>editCampusExperience(null));
+document.getElementById('btnAddIntern').addEventListener('click', ()=>editInternship(null));
+document.getElementById('btnAddEdu').addEventListener('click', ()=>editEducation(null));
+document.getElementById('btnAddProject').addEventListener('click', ()=>editProject(null));
+
+/* ================================================================
+   搜索
+   ================================================================ */
+document.getElementById('searchInput').addEventListener('input', function() {
+  document.querySelector('a[href="#projects"]').click();
+  renderProjects(this.value);
+});
+
+/* ================================================================
+   管理模式
+   ================================================================ */
+document.getElementById('adminBtn').addEventListener('click', function() {
+  if(isAdminMode) {
+    isAdminMode = false;
+    document.body.classList.remove('admin-mode');
+    this.textContent = '⚙️';
+    this.classList.remove('btn-matcha');
+    this.classList.add('btn-outline');
+    renderAll();
+    return;
+  }
+  const pwd = prompt('请输入管理密码：');
+  if(pwd === null) return;
+  if(pwd === ADMIN_PASSWORD) {
+    isAdminMode = true;
+    document.body.classList.add('admin-mode');
+    this.textContent = '🔒';
+    this.classList.remove('btn-outline');
+    this.classList.add('btn-matcha');
+    renderAll();
+  } else { alert('密码错误。'); }
+});
+
+/* ================================================================
+   布局设置面板
+   ================================================================ */
+const SECTION_META = [
+  { id:'hero', name:'首页', icon:'🏠', fixed:true },
+  { id:'about', name:'关于我', icon:'🙋', fixed:false },
+  { id:'projects', name:'作品集', icon:'💼', fixed:false },
+  { id:'experience', name:'经历', icon:'📄', fixed:false },
+  { id:'skills', name:'技能', icon:'⚡', fixed:false },
+  { id:'contact', name:'联系我', icon:'📬', fixed:false }
+];
+
+function showLayoutPanel() {
+  const overlay = document.createElement('div');
+  overlay.className = 'admin-form-modal';
+
+  const order = appData.sectionOrder || SECTION_META.map(s=>s.id);
+  const items = SECTION_META.map(meta => {
+    const idx = order.indexOf(meta.id);
+    return { ...meta, idx: idx>=0 ? idx : 999 };
+  }).sort((a,b) => a.idx - b.idx);
+
+  const listHtml = items.map((item, i) => `
+    <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;margin-bottom:6px;
+      background:${item.fixed?'var(--cream-dark)':'var(--white)'};border-radius:8px;
+      border:1px solid var(--coffee-pale);${item.fixed?'opacity:0.7':''}">
+      <span style="font-size:20px;">${item.icon}</span>
+      <span style="flex:1;font-weight:600;color:var(--text);">${item.name}</span>
+      ${item.fixed ? '<span style="font-size:11px;color:var(--text-hint);">固定</span>' : `
+        <button class="btn btn-sm btn-outline layout-up" data-id="${item.id}" ${i===0?'disabled':''}>⬆</button>
+        <button class="btn btn-sm btn-outline layout-down" data-id="${item.id}" ${i===items.length-1?'disabled':''}>⬇</button>
+      `}
+    </div>
+  `).join('');
+
+  overlay.innerHTML = `<div class="admin-form">
+    <button class="admin-form-close" id="layoutClose">✕</button>
+    <h3>📐 调整板块布局顺序</h3>
+    <p style="font-size:13px;color:var(--text-hint);margin-bottom:14px;">点击 ⬆ ⬇ 调整顺序，首页固定不可移动</p>
+    <div id="layoutList">${listHtml}</div>
+    <div class="form-actions">
+      <button class="btn btn-outline" id="layoutReset">🔄 恢复默认</button>
+      <button class="btn btn-outline" id="layoutCancel">取消</button>
+      <button class="btn btn-primary" id="layoutSave">💾 保存</button>
+    </div>
+  </div>`;
+  document.body.appendChild(overlay);
+
+  function close(){ overlay.remove(); }
+  overlay.querySelector('#layoutClose').addEventListener('click',close);
+  overlay.querySelector('#layoutCancel').addEventListener('click',close);
+  overlay.addEventListener('click',e=>{ if(e.target===overlay) close(); });
+
+  // ⬆ ⬇ 按钮
+  overlay.querySelectorAll('.layout-up').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const id = this.dataset.id;
+      const idx = order.indexOf(id);
+      if(idx>1) { [order[idx], order[idx-1]] = [order[idx-1], order[idx]]; }
+      overlay.remove(); showLayoutPanel();
+    });
+  });
+  overlay.querySelectorAll('.layout-down').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const id = this.dataset.id;
+      const idx = order.indexOf(id);
+      if(idx>=1 && idx<order.length-1) { [order[idx], order[idx+1]] = [order[idx+1], order[idx]]; }
+      overlay.remove(); showLayoutPanel();
+    });
+  });
+
+  // 保存
+  overlay.querySelector('#layoutSave').addEventListener('click', async () => {
+    appData.sectionOrder = order;
+    await saveAndRefresh();
+    applySectionOrder();
+    close();
+  });
+
+  // 恢复默认
+  overlay.querySelector('#layoutReset').addEventListener('click', () => {
+    appData.sectionOrder = ['hero','about','projects','experience','skills','contact'];
+    overlay.remove();
+    showLayoutPanel();
+  });
+}
+
+function applySectionOrder() {
+  const order = appData.sectionOrder || SECTION_META.map(s=>s.id);
+  const main = document.querySelector('.main-content') || document.body;
+
+  // 收集所有 section 的容器
+  const allSections = {};
+  document.querySelectorAll('section[id]').forEach(s => allSections[s.id] = s);
+
+  // 找到第一个 section 的父容器
+  const container = document.getElementById('hero').parentNode;
+
+  // 按 order 重新排列
+  let prevEl = null;
+  order.forEach(sectionId => {
+    const el = document.getElementById(sectionId);
+    if(!el) return;
+    if(prevEl) {
+      prevEl.insertAdjacentElement('afterend', el);
+    } else {
+      container.insertBefore(el, container.firstChild);
+    }
+    prevEl = el;
+  });
+
+  // 同步导航栏
+  updateNavOrder(order);
+}
+
+function updateNavOrder(order) {
+  // 重排 DOCK_ITEMS 顺序
+  const newOrder = order.map(id => DOCK_ITEMS.find(d => d.id === id)).filter(Boolean);
+  DOCK_ITEMS.length = 0;
+  DOCK_ITEMS.push(...newOrder);
+  refreshNavCache();
+}
+
+function refreshNavCache() {
+  buildDock();
+  updateDockActive();
+}
+
+document.getElementById('layoutBtn').addEventListener('click', showLayoutPanel);
+
+/* ================================================================
+   主题设置
+   ================================================================ */
+const FONT_OPTIONS = {
+  nameFont: [
+    { value:'fangsong', label:'仿宋 (FangSong)', sample:'朱羿夫' },
+    { value:'kaiti', label:'楷体 (KaiTi)', sample:'朱羿夫' },
+    { value:'songti', label:'宋体 (SimSun)', sample:'朱羿夫' },
+    { value:'sans', label:'黑体 (SimHei)', sample:'朱羿夫' },
+    { value:'xingkai', label:'行楷 (STXingkai)', sample:'朱羿夫' }
+  ],
+  titleFont: [
+    { value:'serif', label:'思源宋体', sample:'板块标题' },
+    { value:'songti', label:'宋体 (SimSun)', sample:'板块标题' },
+    { value:'sans', label:'黑体 (SimHei)', sample:'板块标题' },
+    { value:'kaiti', label:'楷体 (KaiTi)', sample:'板块标题' }
+  ],
+  bodyFont: [
+    { value:'sans', label:'思源黑体', sample:'正文文字示例' },
+    { value:'yahei', label:'微软雅黑', sample:'正文文字示例' },
+    { value:'songti', label:'宋体 (SimSun)', sample:'正文文字示例' },
+    { value:'kaiti', label:'楷体 (KaiTi)', sample:'正文文字示例' }
+  ]
+};
+
+const COLOR_SCHEMES = {
+  coffee:  { name:'咖啡抹茶',   primary:'#6B3D2E', accent:'#7B8D6E', bg:'#FBF7F2', card:'#FFFFFF', text:'#3D2C26' },
+  navy:    { name:'深海金',     primary:'#2C3E50', accent:'#C4946B', bg:'#F5F6FA', card:'#FFFFFF', text:'#2C3E50' },
+  forest:  { name:'墨绿暖阳',   primary:'#3D5A40', accent:'#D4A574', bg:'#F7F5F0', card:'#FFFFFF', text:'#3A322C' },
+  warm:    { name:'暖棕奶油',   primary:'#8B5E3C', accent:'#C4946B', bg:'#FDF8F3', card:'#FFFFFF', text:'#4A3028' },
+  dark:    { name:'暗夜金',     primary:'#1a1a1a', accent:'#C4946B', bg:'#f5f5f5', card:'#FFFFFF', text:'#222222' }
+};
+
+function applyTheme(theme) {
+  const root = document.documentElement;
+  const cs = COLOR_SCHEMES[theme.colorScheme] || COLOR_SCHEMES.coffee;
+
+  // 配色
+  root.style.setProperty('--coffee-deep', cs.primary);
+  root.style.setProperty('--coffee', cs.primary);
+  root.style.setProperty('--coffee-light', cs.text);
+  root.style.setProperty('--cream', cs.bg);
+  root.style.setProperty('--white', cs.card);
+  root.style.setProperty('--text', theme.textColor || cs.text);
+  root.style.setProperty('--matcha', cs.accent);
+  root.style.setProperty('--matcha-light', cs.accent);
+  root.style.setProperty('--gold', cs.accent);
+
+  // 字体 — 优先用自定义，否则用预设映射
+  const nameMap = { fangsong:'var(--font-fangsong)', kaiti:'KaiTi,"楷体",serif', songti:'SimSun,"宋体",serif', sans:'SimHei,"黑体",sans-serif', xingkai:'STXingkai,"华文行楷",serif' };
+  const titleMap = { serif:'var(--font-serif)', songti:'SimSun,"宋体",serif', sans:'SimHei,"黑体",sans-serif', kaiti:'KaiTi,"楷体",serif' };
+  const bodyMap = { sans:'var(--font-sans)', yahei:'"Microsoft YaHei","微软雅黑",sans-serif', songti:'SimSun,"宋体",serif', kaiti:'KaiTi,"楷体",serif' };
+
+  root.style.setProperty('--hero-name-font', theme.customNameFont || nameMap[theme.nameFont] || nameMap.fangsong);
+  root.style.setProperty('--section-title-font', theme.customTitleFont || titleMap[theme.titleFont] || titleMap.serif);
+  root.style.setProperty('--body-font', theme.customBodyFont || bodyMap[theme.bodyFont] || bodyMap.sans);
+
+  // 自定义颜色
+  root.style.setProperty('--hero-name-color', theme.nameColor || '#ffffff');
+  root.style.setProperty('--hero-title-color', theme.titleColor || 'rgba(255,255,255,0.9)');
+
+  // 字体加粗和阴影
+  const nameWeight = theme.nameBold ? 'bold' : 'normal';
+  const nameShadow = theme.nameShadow ? '0 2px 12px rgba(0,0,0,0.4), 0 0 40px rgba(0,0,0,0.1)' : '0 2px 8px rgba(0,0,0,0.3)';
+  root.style.setProperty('--hero-name-weight', nameWeight);
+  root.style.setProperty('--hero-name-shadow', nameShadow);
+}
+
+function showThemePanel() {
+  const theme = appData.theme || {};
+
+  const overlay = document.createElement('div');
+  overlay.className = 'admin-form-modal';
+
+  const colorOptions = Object.entries(COLOR_SCHEMES).map(([key, cs]) => `
+    <div class="theme-color-opt" data-color="${key}" style="
+      display:inline-flex;align-items:center;gap:8px;padding:8px 14px;margin:4px;
+      border-radius:20px;cursor:pointer;border:2px solid ${theme.colorScheme===key?'var(--coffee)':'transparent'};
+      background:var(--cream-dark);">
+      <span style="width:16px;height:16px;border-radius:50%;background:${cs.primary};display:inline-block;"></span>
+      <span style="width:16px;height:16px;border-radius:50%;background:${cs.accent};display:inline-block;"></span>
+      <span style="font-size:13px;">${cs.name}</span>
+    </div>
+  `).join('');
+
+  function fontPicker(key, label, currentVal) {
+    const opts = FONT_OPTIONS[key];
+    return `<div style="margin-bottom:12px;">
+      <label style="font-size:13px;font-weight:600;">${label}</label>
+      <div style="display:flex;flex-wrap:wrap;gap:4px;margin:4px 0;">${opts.map(o => `
+        <span class="theme-font-opt" data-font="${key}" data-val="${o.value}" style="
+          padding:6px 12px;border-radius:14px;cursor:pointer;font-size:14px;
+          border:2px solid ${currentVal===o.value?'var(--coffee)':'var(--coffee-pale)'};
+          background:${currentVal===o.value?'var(--cream-dark)':'transparent'};">${o.sample}</span>
+      `).join('')}</div>
+      <input class="form-input theme-font-input" data-font="${key}" placeholder="或输入任意字体名称..." value="${escapeHtml(theme[key.startsWith('custom')?key:'custom'+key.charAt(0).toUpperCase()+key.slice(1)]||'')}" style="height:32px;font-size:13px;">
+    </div>`;
+  }
+
+  overlay.innerHTML = `<div class="admin-form" style="max-width:560px;">
+    <button class="admin-form-close" id="themeClose">✕</button>
+    <h3>🎨 主题设置</h3>
+
+    <label style="font-size:13px;font-weight:600;">配色方案</label>
+    <div style="margin-bottom:12px;">${colorOptions}</div>
+
+    <label style="font-size:13px;font-weight:600;">自定义颜色</label>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
+      <div><label style="font-size:11px;color:var(--text-hint);">姓名颜色</label><input type="color" class="theme-color-input" data-key="nameColor" value="${theme.nameColor||'#ffffff'}" style="width:40px;height:30px;border:none;cursor:pointer;"></div>
+      <div><label style="font-size:11px;color:var(--text-hint);">头衔颜色</label><input type="color" class="theme-color-input" data-key="titleColor" value="${theme.titleColor||'rgba(255,255,255,0.9)'}" style="width:40px;height:30px;border:none;cursor:pointer;"></div>
+      <div><label style="font-size:11px;color:var(--text-hint);">正文颜色</label><input type="color" class="theme-color-input" data-key="textColor" value="${theme.textColor||'#3D2C26'}" style="width:40px;height:30px;border:none;cursor:pointer;"></div>
+    </div>
+
+    ${fontPicker('nameFont', '姓名字体', theme.nameFont||'fangsong')}
+    ${fontPicker('titleFont', '标题字体', theme.titleFont||'serif')}
+    ${fontPicker('bodyFont', '正文字体', theme.bodyFont||'sans')}
+
+    <div class="form-actions">
+      <button class="btn btn-outline" id="themeReset">🔄 默认</button>
+      <button class="btn btn-outline" id="themeCancel">取消</button>
+      <button class="btn btn-primary" id="themeSave">💾 保存</button>
+    </div>
+  </div>`;
+  document.body.appendChild(overlay);
+
+  function close(){ overlay.remove(); }
+  overlay.querySelector('#themeClose').addEventListener('click',close);
+  overlay.querySelector('#themeCancel').addEventListener('click',close);
+  overlay.addEventListener('click',e=>{ if(e.target===overlay) close(); });
+
+  // 配色选择
+  overlay.querySelectorAll('.theme-color-opt').forEach(opt => {
+    opt.addEventListener('click', function() {
+      theme.colorScheme = this.dataset.color;
+      applyTheme(theme);
+      overlay.remove(); showThemePanel();
+    });
+  });
+
+  // 颜色输入
+  overlay.querySelectorAll('.theme-color-input').forEach(input => {
+    input.addEventListener('input', function() {
+      theme[this.dataset.key] = this.value;
+      applyTheme(theme);
+    });
+  });
+
+  // 字体预设
+  overlay.querySelectorAll('.theme-font-opt').forEach(opt => {
+    opt.addEventListener('click', function() {
+      theme[this.dataset.font] = this.dataset.val;
+      applyTheme(theme);
+      overlay.remove(); showThemePanel();
+    });
+  });
+
+  // 自定义字体输入
+  overlay.querySelectorAll('.theme-font-input').forEach(input => {
+    const key = 'custom' + input.dataset.font.charAt(0).toUpperCase() + input.dataset.font.slice(1);
+    input.addEventListener('input', function() {
+      theme[key] = this.value;
+      applyTheme(theme);
+    });
+  });
+
+  // 保存
+  overlay.querySelector('#themeSave').addEventListener('click', async () => {
+    appData.theme = theme;
+    await saveData(appData);
+    close();
+  });
+
+  // 重置
+  overlay.querySelector('#themeReset').addEventListener('click', () => {
+    const def = { nameFont:'fangsong', titleFont:'serif', bodyFont:'sans', colorScheme:'coffee', nameColor:'#ffffff', titleColor:'rgba(255,255,255,0.9)', textColor:'#3D2C26', customNameFont:'', customTitleFont:'', customBodyFont:'' };
+    Object.assign(theme, def);
+    applyTheme(theme);
+    overlay.remove(); showThemePanel();
+  });
+}
+
+document.getElementById('themeBtn').addEventListener('click', showThemePanel);
+
+/* ================================================================
+   Dock 导航：渲染 + 悬浮放大 + 平滑滚动 + 高亮
+   ================================================================ */
+const DOCK_ITEMS = [
+  { id:'hero', icon:'🏠', label:'首页' },
+  { id:'about', icon:'🙋', label:'关于' },
+  { id:'projects', icon:'💼', label:'作品' },
+  { id:'experience', icon:'📄', label:'经历' },
+  { id:'skills', icon:'⚡', label:'技能' },
+  { id:'contact', icon:'📬', label:'联系' }
+];
+
+const BASE_SIZE = 48;
+const MAG_SIZE = 72;
+
+  </script>E html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
@@ -1798,84 +3361,4 @@
       console.log('✅ Portfolio v2 就绪');}catch(e){console.error(e);}
     })();
   
-    /* === 管理功能 === */
-function compressImage(file, maxW, quality) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = e => {
-      const img = new Image();
-      img.onload = () => {
-        let w=img.width, h=img.height;
-        if(w>maxW){ h=Math.round(h*maxW/w); w=maxW; }
-        const c=document.createElement('canvas'); c.width=w; c.height=h;
-        c.getContext('2d').drawImage(img,0,0,w,h);
-        resolve(c.toDataURL('image/jpeg',quality));
-      };
-      img.src = e.target.result;
-    };
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
-}
-
-function showFormModal(title, fields, onSubmit) {
-  const existing = document.querySelector('.admin-form-modal');
-  if(existing) existing.remove();
-
-  const overlay = document.createElement('div');
-  overlay.className = 'admin-form-modal';
-
-  let fieldsHtml = fields.map(f => {
-    if(f.type==='textarea') return `<div class="form-group"><label>${f.label}</label><textarea class="form-textarea" id="field_${f.key}" placeholder="${f.placeholder||''}">${escapeHtml(f.value||'')}</textarea></div>`;
-    if(f.type==='image') return `<div class="form-group"><label>${f.label}</label><div class="upload-area" id="field_${f.key}_area"><span>📷 点击上传（自动压缩）</span><input type="file" accept="image/*" id="field_${f.key}_input" style="display:none;">${f.value?`<img class="upload-preview" src="${f.value}" alt="预览">`:''}</div></div>`;
-    if(f.type==='tags') return `<div class="form-group"><label>${f.label}</label><input class="form-input" id="field_${f.key}" placeholder="${f.placeholder||'逗号分隔'}" value="${escapeHtml((f.value||[]).join(', '))}"></div>`;
-    return `<div class="form-group"><label>${f.label}</label><input class="form-input" id="field_${f.key}" placeholder="${f.placeholder||''}" value="${escapeHtml(f.value||'')}"></div>`;
-  }).join('');
-
-  overlay.innerHTML = `<div class="admin-form">
-    <button class="admin-form-close" id="afClose">✕</button>
-    <h3>${title}</h3>${fieldsHtml}
-    <div class="form-actions">
-      <button class="btn btn-outline" id="afCancel">取消</button>
-      <button class="btn btn-primary" id="afSave">💾 保存</button>
-    </div>
-  </div>`;
-  document.body.appendChild(overlay);
-
-  function close(){ overlay.remove(); }
-  overlay.querySelector('#afClose').addEventListener('click',close);
-  overlay.querySelector('#afCancel').addEventListener('click',close);
-  overlay.addEventListener('click',e=>{ if(e.target===overlay) close(); });
-
-  fields.filter(f=>f.type==='image').forEach(f=>{
-    const area = overlay.querySelector('#field_'+f.key+'_area');
-    const input = overlay.querySelector('#field_'+f.key+'_input');
-    area.addEventListener('click',()=>input.click());
-    input.addEventListener('change',async function(){
-      if(!this.files[0]) return;
-      const b64 = await compressImage(this.files[0], 800, 0.7);
-      f._uploaded = b64;
-      const prev = area.querySelector('.upload-preview');
-      if(prev) prev.src = b64;
-      else { const img=document.createElement('img'); img.className='upload-preview'; img.src=b64; area.appendChild(img); }
-    });
-  });
-
-  overlay.querySelector('#afSave').addEventListener('click',()=>{
-    const vals = {};
-    fields.forEach(f => {
-      if(f.type==='image') vals[f.key] = f._uploaded || f.value || '';
-      else if(f.type==='tags') vals[f.key] = overlay.querySelector('#field_'+f.key).value.split(/[,，]/).map(s=>s.trim()).filter(Boolean);
-      else vals[f.key] = overlay.querySelector('#field_'+f.key).value;
-    });
-    close();
-    onSubmit(vals);
-  });
-
-  document.addEventListener('keydown', function escH(e){ if(e.key==='Escape'){ close(); document.removeEventListener('keydown',escH); } });
-}
-
-
-  </script>
-</body>
-</html>
+    
