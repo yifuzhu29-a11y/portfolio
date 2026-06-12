@@ -161,8 +161,15 @@ body {
   content: ''; position: absolute; inset: 0;
   background: rgba(0,0,0,0.2);
   border-radius: var(--radius-lg);
+  z-index: 1;
 }
-.hero-banner > * { position: relative; z-index: 1; }
+.hero-video {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: cover; border-radius: var(--radius-lg);
+  z-index: 0; display: none;
+}
+.hero-video.show { display: block; }
+.hero-banner > * { position: relative; z-index: 2; }
 .hero-photo {
   width: 140px; height: 140px; border-radius: 50%;
   object-fit: cover; margin-bottom: 24px;
@@ -617,6 +624,7 @@ body.admin-mode .add-btn { display:inline-flex; }
 <section id="hero" class="hero section-light fade-in">
   <div class="section-inner" style="text-align:center;">
     <div class="hero-banner" id="heroBanner">
+      <video class="hero-video" id="heroVideo" autoplay loop muted playsinline></video>
       <div id="heroPhoto"></div>
       <div class="hero-name" id="heroName">---</div>
       <div class="hero-title" id="heroTitle"></div>
@@ -830,6 +838,7 @@ function getDefaultData() {
       title:'AIGC 视频制作 · 视觉传达',
       photo:'',
       banner:'',
+      heroVideo:'bg-video.mp4',
       location:'武汉',
       experience:'硕士在读',
       status:'应届生 · 寻求 AIGC/视频制作岗位',
@@ -996,6 +1005,16 @@ function renderHero() {
   const banner = document.getElementById('heroBanner');
   if(p.banner) banner.style.backgroundImage = `url(${p.banner})`;
   else banner.style.backgroundImage = '';
+
+  // 背景视频
+  const video = document.getElementById('heroVideo');
+  if(p.heroVideo) {
+    video.src = p.heroVideo;
+    video.classList.add('show');
+  } else {
+    video.classList.remove('show');
+    video.src = '';
+  }
 
   // 照片
   const pc = document.getElementById('heroPhoto');
@@ -1713,7 +1732,8 @@ function editProfile() {
     { key:'name', label:'姓名', value:appData.profile.name },
     { key:'title', label:'求职意向/头衔', value:appData.profile.title },
     { key:'photo', label:'个人照片', type:'image', value:appData.profile.photo },
-    { key:'banner', label:'头像背景板（可选，建议 700×300）', type:'image', value:appData.profile.banner||'' },
+    { key:'banner', label:'头像背景板（可选）', type:'image', value:appData.profile.banner||'' },
+    { key:'heroVideo', label:'背景视频（文件名或链接，留空取消）', value:appData.profile.heroVideo||'' },
     { key:'location', label:'所在地', value:appData.profile.location||'' },
     { key:'experience', label:'工作年限/学历', value:appData.profile.experience||'' },
     { key:'status', label:'求职状态', value:appData.profile.status||'' },
@@ -1724,6 +1744,7 @@ function editProfile() {
     appData.profile.title = vals.title;
     appData.profile.photo = vals.photo;
     appData.profile.banner = vals.banner;
+    appData.profile.heroVideo = vals.heroVideo;
     appData.profile.location = vals.location;
     appData.profile.experience = vals.experience;
     appData.profile.status = vals.status;
