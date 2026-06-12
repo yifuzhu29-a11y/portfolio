@@ -1797,6 +1797,85 @@
       const hd=document.getElementById('hero');if(hd)hd.scrollIntoView();
       console.log('✅ Portfolio v2 就绪');}catch(e){console.error(e);}
     })();
+  
+    /* === 管理功能 === */
+function compressImage(file, maxW, quality) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const img = new Image();
+      img.onload = () => {
+        let w=img.width, h=img.height;
+        if(w>maxW){ h=Math.round(h*maxW/w); w=maxW; }
+        const c=document.createElement('canvas'); c.width=w; c.height=h;
+        c.getContext('2d').drawImage(img,0,0,w,h);
+        resolve(c.toDataURL('image/jpeg',quality));
+      };
+      img.src = e.target.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+function showFormModal(title, fields, onSubmit) {
+  const existing = document.querySelector('.admin-form-modal');
+  if(existing) existing.remove();
+
+  const overlay = document.createElement('div');
+  overlay.className = 'admin-form-modal';
+
+  let fieldsHtml = fields.map(f => {
+    if(f.type==='textarea') return `<div class="form-group"><label>${f.label}</label><textarea class="form-textarea" id="field_${f.key}" placeholder="${f.placeholder||''}">${escapeHtml(f.value||'')}</textarea></div>`;
+    if(f.type==='image') return `<div class="form-group"><label>${f.label}</label><div class="upload-area" id="field_${f.key}_area"><span>📷 点击上传（自动压缩）</span><input type="file" accept="image/*" id="field_${f.key}_input" style="display:none;">${f.value?`<img class="upload-preview" src="${f.value}" alt="预览">`:''}</div></div>`;
+    if(f.type==='tags') return `<div class="form-group"><label>${f.label}</label><input class="form-input" id="field_${f.key}" placeholder="${f.placeholder||'逗号分隔'}" value="${escapeHtml((f.value||[]).join(', '))}"></div>`;
+    return `<div class="form-group"><label>${f.label}</label><input class="form-input" id="field_${f.key}" placeholder="${f.placeholder||''}" value="${escapeHtml(f.value||'')}"></div>`;
+  }).join('');
+
+  overlay.innerHTML = `<div class="admin-form">
+    <button class="admin-form-close" id="afClose">✕</button>
+    <h3>${title}</h3>${fieldsHtml}
+    <div class="form-actions">
+      <button class="btn btn-outline" id="afCancel">取消</button>
+      <button class="btn btn-primary" id="afSave">💾 保存</button>
+    </div>
+  </div>`;
+  document.body.appendChild(overlay);
+
+  function close(){ overlay.remove(); }
+  overlay.querySelector('#afClose').addEventListener('click',close);
+  overlay.querySelector('#afCancel').addEventListener('click',close);
+  overlay.addEventListener('click',e=>{ if(e.target===overlay) close(); });
+
+  fields.filter(f=>f.type==='image').forEach(f=>{
+    const area = overlay.querySelector('#field_'+f.key+'_area');
+    const input = overlay.querySelector('#field_'+f.key+'_input');
+    area.addEventListener('click',()=>input.click());
+    input.addEventListener('change',async function(){
+      if(!this.files[0]) return;
+      const b64 = await compressImage(this.files[0], 800, 0.7);
+      f._uploaded = b64;
+      const prev = area.querySelector('.upload-preview');
+      if(prev) prev.src = b64;
+      else { const img=document.createElement('img'); img.className='upload-preview'; img.src=b64; area.appendChild(img); }
+    });
+  });
+
+  overlay.querySelector('#afSave').addEventListener('click',()=>{
+    const vals = {};
+    fields.forEach(f => {
+      if(f.type==='image') vals[f.key] = f._uploaded || f.value || '';
+      else if(f.type==='tags') vals[f.key] = overlay.querySelector('#field_'+f.key).value.split(/[,，]/).map(s=>s.trim()).filter(Boolean);
+      else vals[f.key] = overlay.querySelector('#field_'+f.key).value;
+    });
+    close();
+    onSubmit(vals);
+  });
+
+  document.addEventListener('keydown', function escH(e){ if(e.key==='Escape'){ close(); document.removeEventListener('keydown',escH); } });
+}
+
+
   </script>
 </body>
 </html>
