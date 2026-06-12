@@ -46,49 +46,69 @@
    基础重置
    ================================================================ */
 *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
-html { scroll-behavior: smooth; scroll-padding-top: 64px; }
+html { scroll-behavior: smooth; scroll-padding-top: 20px; }
 body {
-  font-family: var(--font-sans);
+  font-family: var(--body-font);
   background: var(--cream);
   color: var(--text);
   line-height: 1.7;
   font-size: 15px;
   -webkit-font-smoothing: antialiased;
+  padding-bottom: 100px;
 }
 
 /* ================================================================
-   导航栏
+   macOS Dock 风格导航栏
    ================================================================ */
-.navbar {
-  position: fixed; top:0; left:0; right:0; z-index:100;
-  height: 60px;
-  background: rgba(255,255,255,0.92);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-bottom: 1px solid rgba(139,111,94,0.15);
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 0 28px;
+.dock-container {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
+  display: flex; justify-content: center; align-items: flex-end;
+  pointer-events: none; padding-bottom: 12px;
 }
-.nav-brand {
-  font-family: var(--font-fangsong);
-  font-size: 20px;
-  font-weight: bold;
-  color: var(--coffee-deep);
-  letter-spacing: 2px;
+.dock-panel {
+  display: flex; align-items: flex-end; gap: 6px;
+  padding: 8px 16px 10px;
+  border-radius: 20px;
+  background: rgba(30,20,16,0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,0.1);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+  pointer-events: auto;
 }
-.nav-links { display:flex; list-style:none; gap:2px; }
-.nav-links a {
-  color: var(--text-secondary);
-  text-decoration: none;
-  padding: 6px 16px; border-radius: 20px;
-  font-size: 14px;
-  cursor: pointer;
-  transition: all var(--transition);
+.dock-item {
+  position: relative;
+  display: flex; flex-direction: column; align-items: center;
+  cursor: pointer; transition: width 0.15s ease-out, height 0.15s ease-out;
+  border-radius: 12px;
+  flex-shrink: 0;
 }
-.nav-links a:hover { color: var(--coffee); background: var(--cream-dark); }
-.nav-links a.active { color: var(--coffee-deep); background: rgba(196,148,107,0.25); font-weight: 600; }
-.nav-right { display:flex; align-items:center; gap:8px; }
-.nav-right .btn { white-space: nowrap; }
+.dock-icon {
+  width: 100%; height: 100%;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.08);
+  color: rgba(255,255,255,0.8);
+  font-size: 22px;
+  transition: background 0.2s, color 0.2s;
+}
+.dock-item.active .dock-icon {
+  background: rgba(255,255,255,0.2);
+  color: #fff;
+}
+.dock-label {
+  position: absolute; top: -28px; left: 50%; transform: translateX(-50%);
+  white-space: nowrap; font-size: 11px; color: #fff;
+  background: rgba(0,0,0,0.75); padding: 3px 10px; border-radius: 6px;
+  opacity: 0; transition: opacity 0.2s;
+  pointer-events: none;
+}
+.dock-item:hover .dock-label { opacity: 1; }
+/* 顶部小工具栏 */
+.nav-top {
+  position: fixed; top: 8px; right: 16px; z-index: 101;
+  display: flex; gap: 6px;
+}
 
 /* ================================================================
    通用板块
@@ -597,26 +617,19 @@ body.admin-mode .add-btn { display:inline-flex; }
 <body>
 
 <!-- ===== 导航栏 ===== -->
-<nav class="navbar">
-  <div class="nav-brand">个人简历</div>
-  <ul class="nav-links">
-    <li><a href="#hero" class="active">首页</a></li>
-    <li><a href="#about">关于</a></li>
-    <li><a href="#projects">作品</a></li>
-    <li><a href="#experience">经历</a></li>
-    <li><a href="#skills">技能</a></li>
-    <li><a href="#contact">联系</a></li>
-  </ul>
-  <div class="nav-right">
-    <input type="text" class="form-input" id="searchInput" placeholder="🔍 搜索项目..." style="width:160px;height:32px;font-size:13px;">
-    <button class="btn btn-sm btn-outline add-btn" id="layoutBtn" title="调整布局顺序">📐 布局</button>
-    <button class="btn btn-sm btn-outline add-btn" id="themeBtn" title="主题设置">🎨 主题</button>
-    <button class="btn btn-sm btn-outline" id="adminBtn">⚙️</button>
-  </div>
-</nav>
-
-<!-- 管理模式标签 -->
+<!-- 顶部小工具栏 -->
+<div class="nav-top">
+  <input type="text" class="form-input" id="searchInput" placeholder="🔍 搜索..." style="width:140px;height:30px;font-size:12px;background:rgba(255,255,255,0.9);">
+  <button class="btn btn-sm btn-outline add-btn" id="layoutBtn" style="font-size:11px;">📐</button>
+  <button class="btn btn-sm btn-outline add-btn" id="themeBtn" style="font-size:11px;">🎨</button>
+  <button class="btn btn-sm btn-outline" id="adminBtn" style="font-size:11px;">⚙️</button>
+</div>
 <div class="admin-badge">🔧 管理模式</div>
+
+<!-- macOS Dock 导航栏 -->
+<div class="dock-container" id="dockContainer">
+  <div class="dock-panel" id="dockPanel"></div>
+</div>
 
 <!-- ================================================================
      Hero 区
@@ -2374,47 +2387,16 @@ function applySectionOrder() {
 }
 
 function updateNavOrder(order) {
-  const navLinks = document.querySelector('.nav-links');
-  const existingLinks = {};
-  navLinks.querySelectorAll('a').forEach(a => {
-    existingLinks[a.dataset.section] = a;
-  });
-
-  const sectionToNav = {
-    'hero': 'hero', 'about': 'about', 'projects': 'projects',
-    'experience': 'experience', 'skills': 'skills', 'contact': 'contact'
-  };
-
-  navLinks.innerHTML = '';
-  order.forEach(sectionId => {
-    const navId = sectionToNav[sectionId];
-    const meta = SECTION_META.find(s=>s.id===sectionId);
-    if(!meta) return;
-    const a = document.createElement('a');
-    a.href = '#' + sectionId;
-    a.dataset.section = navId || sectionId;
-    a.textContent = meta.icon + ' ' + meta.name;
-    a.addEventListener('click', function(e) {
-      e.preventDefault();
-      document.querySelectorAll('.nav-links a').forEach(l=>l.classList.remove('active'));
-      this.classList.add('active');
-      document.getElementById(sectionId).scrollIntoView({ behavior:'smooth' });
-    });
-    navLinks.appendChild(a);
-  });
-
-  // 重新缓存导航链接
+  // 重排 DOCK_ITEMS 顺序
+  const newOrder = order.map(id => DOCK_ITEMS.find(d => d.id === id)).filter(Boolean);
+  DOCK_ITEMS.length = 0;
+  DOCK_ITEMS.push(...newOrder);
   refreshNavCache();
 }
 
 function refreshNavCache() {
-  const links = document.querySelectorAll('.nav-links a');
-  sections.length = 0;
-  links.forEach(a => {
-    const el = document.querySelector(a.getAttribute('href'));
-    if(el) sections.push({el, a});
-  });
-  updateActiveNav();
+  buildDock();
+  updateDockActive();
 }
 
 document.getElementById('layoutBtn').addEventListener('click', showLayoutPanel);
@@ -2603,30 +2585,97 @@ function showThemePanel() {
 document.getElementById('themeBtn').addEventListener('click', showThemePanel);
 
 /* ================================================================
-   导航：平滑滚动 + 高亮
+   Dock 导航：渲染 + 悬浮放大 + 平滑滚动 + 高亮
    ================================================================ */
-document.querySelectorAll('.nav-links a').forEach(link => {
-  link.addEventListener('click', function(e) {
-    e.preventDefault();
-    const target = document.querySelector(this.getAttribute('href'));
-    if(target) target.scrollIntoView({ behavior:'smooth' });
+const DOCK_ITEMS = [
+  { id:'hero', icon:'🏠', label:'首页' },
+  { id:'about', icon:'🙋', label:'关于' },
+  { id:'projects', icon:'💼', label:'作品' },
+  { id:'experience', icon:'📄', label:'经历' },
+  { id:'skills', icon:'⚡', label:'技能' },
+  { id:'contact', icon:'📬', label:'联系' }
+];
+
+const BASE_SIZE = 48;
+const MAG_SIZE = 72;
+const DOCK_DISTANCE = 120;
+let dockItems = [];
+let dockMouseX = Infinity;
+let activeSection = 'hero';
+
+function buildDock() {
+  const panel = document.getElementById('dockPanel');
+  panel.innerHTML = DOCK_ITEMS.map(item => `
+    <div class="dock-item" data-section="${item.id}" style="width:${BASE_SIZE}px;height:${BASE_SIZE}px;">
+      <div class="dock-label">${item.label}</div>
+      <div class="dock-icon">${item.icon}</div>
+    </div>
+  `).join('');
+  dockItems = panel.querySelectorAll('.dock-item');
+}
+
+function updateDockMagnify() {
+  if(dockMouseX === Infinity) {
+    dockItems.forEach(el => {
+      el.style.width = BASE_SIZE + 'px';
+      el.style.height = BASE_SIZE + 'px';
+    });
+    return;
+  }
+  dockItems.forEach(el => {
+    const rect = el.getBoundingClientRect();
+    const cx = rect.left + rect.width/2;
+    const dist = Math.abs(dockMouseX - cx);
+    const size = dist < DOCK_DISTANCE
+      ? MAG_SIZE - (MAG_SIZE - BASE_SIZE) * (dist / DOCK_DISTANCE)
+      : BASE_SIZE;
+    el.style.width = Math.max(BASE_SIZE, size) + 'px';
+    el.style.height = Math.max(BASE_SIZE, size) + 'px';
   });
+}
+
+// 悬浮检测
+const dockContainer = document.getElementById('dockContainer');
+dockContainer.addEventListener('mousemove', function(e) {
+  dockMouseX = e.clientX;
+  updateDockMagnify();
+});
+dockContainer.addEventListener('mouseleave', function() {
+  dockMouseX = Infinity;
+  updateDockMagnify();
 });
 
-// 滚动时自动高亮当前区域
-const navLinks = document.querySelectorAll('.nav-links a');
-const sections = [];
-navLinks.forEach(a => { const el = document.querySelector(a.getAttribute('href')); if(el) sections.push({el, a}); });
+// 点击导航
+document.getElementById('dockPanel').addEventListener('click', function(e) {
+  const item = e.target.closest('.dock-item');
+  if(!item) return;
+  const sectionId = item.dataset.section;
+  const target = document.getElementById(sectionId);
+  if(target) {
+    target.scrollIntoView({ behavior:'smooth' });
+    activeSection = sectionId;
+    updateDockActive();
+  }
+});
 
-function updateActiveNav() {
-  let current = sections[0];
-  sections.forEach(s => {
-    if(s.el.getBoundingClientRect().top <= 120) current = s;
+// 滚动高亮
+function updateDockActive() {
+  // 找当前可见的 section
+  let current = activeSection;
+  DOCK_ITEMS.forEach(item => {
+    const el = document.getElementById(item.id);
+    if(el && el.getBoundingClientRect().top <= 200) current = item.id;
   });
-  navLinks.forEach(a => a.classList.remove('active'));
-  if(current) current.a.classList.add('active');
+  activeSection = current;
+  dockItems.forEach(el => {
+    el.classList.toggle('active', el.dataset.section === activeSection);
+  });
 }
-window.addEventListener('scroll', updateActiveNav, {passive:true});
+window.addEventListener('scroll', updateDockActive, {passive:true});
+
+// 初始构建
+buildDock();
+updateDockActive();
 
 /* ================================================================
    淡入动画
