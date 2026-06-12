@@ -1791,11 +1791,23 @@
 
     /* ===== 初始化 ===== */
     (async function init(){
-      try{let sd=null;try{const r=await fetch('data.json',{cache:'no-cache'});if(r.ok)sd=await r.json();}catch(e){}if(sd&&sd.profile){appData={...getDefaultData(),...sd};await saveData(appData);}else{appData=await loadData();}
-      if(!appData.sectionOrder)appData.sectionOrder=['hero','about','projects','experience','skills','contact'];
-      renderAll();
-      const hd=document.getElementById('hero');if(hd)hd.scrollIntoView();
-      console.log('✅ Portfolio v2 就绪');}catch(e){console.error(e);}
+      try{
+        // 优先使用 IndexedDB 本地数据
+        appData = await loadData();
+        // 如果本地数据为空或不完整，再尝试 data.json
+        if((!appData.projects||appData.projects.length===0) && (!appData.campusExperience||appData.campusExperience.length===0)){
+          try{
+            const r=await fetch('data.json',{cache:'no-cache'});
+            if(r.ok){
+              const sd=await r.json();
+              if(sd&&sd.profile){appData={...getDefaultData(),...sd};}
+            }
+          }catch(e){}
+        }
+        if(!appData.sectionOrder)appData.sectionOrder=['hero','about','projects','experience','skills','contact'];
+        renderAll();
+        console.log('✅ Portfolio v2 就绪');
+      }catch(e){console.error(e);}
     })();
   </script>
 </body>
