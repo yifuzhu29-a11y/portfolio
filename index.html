@@ -1003,17 +1003,20 @@ function renderHero() {
 
   // 头像背景板
   const banner = document.getElementById('heroBanner');
-  if(p.banner) banner.style.backgroundImage = `url(${p.banner})`;
-  else banner.style.backgroundImage = '';
-
-  // 背景视频
   const video = document.getElementById('heroVideo');
   if(p.heroVideo) {
-    video.src = p.heroVideo;
+    // 视频作为背景：隐藏渐变底，视频铺满，保留暗色遮罩
+    banner.style.background = 'transparent';
+    if(p.banner) banner.style.backgroundImage = `url(${p.banner})`;
+    if(video.src !== p.heroVideo) video.src = p.heroVideo;
     video.classList.add('show');
+    video.play().catch(()=>{});
   } else {
     video.classList.remove('show');
+    video.pause();
     video.src = '';
+    if(p.banner) banner.style.backgroundImage = `url(${p.banner})`;
+    else banner.style.background = 'linear-gradient(160deg, #6B3D2E 0%, #8B6F5E 40%, #C4A89C 100%)';
   }
 
   // 照片
