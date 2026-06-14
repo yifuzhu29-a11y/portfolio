@@ -3533,7 +3533,16 @@
       await saveData(d);
       appData = d;
       renderAll();
-      alert('导入成功，已保存到当前浏览器。想让别人打开也看到这份内容，请再点“发布到线上”。');
+      if(confirm('导入成功，已保存到当前浏览器。要马上发布到线上，让别人打开也看到这份内容吗？')) {
+        const publishBtn = document.getElementById('btnPublish');
+        publishBtn.textContent = '发布中...';
+        publishBtn.disabled = true;
+        await publishDataToGithub(publishBtn);
+        publishBtn.textContent = '发布到线上';
+        publishBtn.disabled = false;
+      } else {
+        alert('这份内容目前只保存在当前浏览器。之后可以点“发布到线上”同步到网站。');
+      }
     } catch(e) {
       alert('❌ 失败：' + e.message);
     }
@@ -4011,4 +4020,3 @@
   </script>
 </body>
 </html>
-
