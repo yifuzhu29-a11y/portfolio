@@ -1966,16 +1966,24 @@
     const remote = seedData ? normalizePortfolioData(seedData) : null;
     const local = localData ? normalizePortfolioData(localData) : null;
 
-    if(location.protocol !== 'file:' && remote) {
-      const localHasPublishedMeta = Boolean(local?.__meta?.updatedAt);
-      const localIsDraft = local?.__meta?.localDraft === true;
-      const localDraftIsNewer = dataTime(local, 'localSavedAt') > dataTime(remote, 'updatedAt');
-      if(local && localIsDraft && localHasPublishedMeta && localDraftIsNewer) {
+    // 简单规则：比较时间戳，谁新用谁
+    const remoteTime = dataTime(remote, 'updatedAt');
+    const localTime = dataTime(local, 'localSavedAt');
+
+    // 线上模式：有 remote 且有 local，比较时间
+    if(location.protocol !== 'file:' && remote && local) {
+      if(localTime >= remoteTime) {
         return { data: local, shouldSave: false };
       }
       return { data: remote, shouldSave: true };
     }
 
+    // 线上模式：有 remote 无 local → 用线上
+    if(location.protocol !== 'file:' && remote && !local) {
+      return { data: remote, shouldSave: true };
+    }
+
+    // 本地模式或无 remote：保留 local，否则用默认
     if(local) return { data: local, shouldSave: false };
     if(remote) return { data: remote, shouldSave: true };
     return { data: normalizePortfolioData(getDefaultData()), shouldSave: true };
