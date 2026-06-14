@@ -1467,7 +1467,7 @@
     <p>
       <button class="btn btn-sm btn-outline" id="btnExport">📥 导出备份</button>
       <button class="btn btn-sm btn-outline" id="btnImport">📤 导入备份</button>
-      <button class="btn btn-sm btn-primary" id="btnPublish">🔗 生成链接</button>
+      <button class="btn btn-sm btn-primary" id="btnPublish">发布到线上</button>
       <button class="btn btn-sm btn-danger" id="btnReset" style="font-size:11px;">🔄 重置</button>
     </p>
   </footer>
@@ -1899,16 +1899,43 @@
     };
   }
 
+  function normalizeText(value, fallback = '') {
+    return typeof value === 'string' ? value : fallback;
+  }
+
+  function normalizeArray(value, fallback = []) {
+    return Array.isArray(value) ? value : fallback;
+  }
+
   function normalizePortfolioData(data) {
+    data = (data && typeof data === 'object' && !Array.isArray(data)) ? data : {};
     const defaults = getDefaultData();
     data.profile = { ...defaults.profile, ...(data.profile || {}) };
     data.profile.heroHeading = data.profile.heroHeading || data.profile.name || defaults.profile.heroHeading;
     data.profile.aboutStyle = { ...getDefaultAboutStyle(), ...(data.profile.aboutStyle || {}) };
+    data.skills = normalizeArray(data.skills, defaults.skills);
+    data.education = normalizeArray(data.education, defaults.education);
+    data.campusExperience = normalizeArray(data.campusExperience, defaults.campusExperience);
+    data.internship = normalizeArray(data.internship, defaults.internship);
+    data.projects = normalizeArray(data.projects, defaults.projects).map(project => ({
+      ...project,
+      id: project?.id || genId(),
+      name: normalizeText(project?.name, '未命名项目'),
+      description: normalizeText(project?.description),
+      images: normalizeArray(project?.images),
+      tags: normalizeArray(project?.tags),
+      category: normalizeText(project?.category, '未分类')
+    }));
+    data.contact = {
+      ...defaults.contact,
+      ...(data.contact || {}),
+      items: normalizeArray(data.contact?.items, defaults.contact.items)
+    };
     data.sectionStyles = { ...getDefaultSectionStyles(), ...(data.sectionStyles || {}) };
     Object.keys(getDefaultSectionStyles()).forEach(id => {
       data.sectionStyles[id] = { ...getDefaultSectionStyles()[id], ...(data.sectionStyles[id] || {}) };
     });
-    data.sectionOrder = data.sectionOrder || defaults.sectionOrder;
+    data.sectionOrder = normalizeArray(data.sectionOrder, defaults.sectionOrder);
     return data;
   }
 
@@ -3506,7 +3533,7 @@
       await saveData(d);
       appData = d;
       renderAll();
-      alert('✅ 导入成功！');
+      alert('导入成功，已保存到当前浏览器。想让别人打开也看到这份内容，请再点“发布到线上”。');
     } catch(e) {
       alert('❌ 失败：' + e.message);
     }
@@ -3521,19 +3548,15 @@
     renderAll();
   });
 
-  // 发布
-  document.getElementById('btnPublish').addEventListener('click', async function() {
-    const btn = this;
-    btn.textContent = '⏳...'; btn.disabled = true;
-
+  async function publishDataToGithub(btn) {
     let token = localStorage.getItem('gh_pub_tok');
     if(!token) {
       token = prompt('输入 GitHub Token（只需一次）：');
-      if(!token) { btn.textContent='🔗 生成链接'; btn.disabled=false; return; }
+      if(!token) return false;
       localStorage.setItem('gh_pub_tok', token);
     }
 
-    const clean = JSON.parse(JSON.stringify(appData));
+    const clean = normalizePortfolioData(JSON.parse(JSON.stringify(appData || getDefaultData())));
     const json = JSON.stringify(clean);
     const enc = new TextEncoder();
     const bytes = enc.encode(json);
@@ -3560,7 +3583,10 @@
         body: JSON.stringify({ message:'更新数据', content:b64, sha:sha||undefined })
       });
       if(resp.ok) {
-        alert('✅ 发布成功！稍后刷新 https://yifuzhu29-a11y.github.io/portfolio/');
+        await saveData(clean);
+        appData = clean;
+        alert('发布成功！稍等几十秒后刷新线上页面即可看到最新内容。');
+        return true;
       } else if(resp.status===401) {
         localStorage.removeItem('gh_pub_tok');
         alert('Token 无效，请重试。');
@@ -3571,7 +3597,15 @@
     } catch(e) {
       alert('网络错误：' + e.message);
     }
-    btn.textContent = '🔗 生成链接'; btn.disabled = false;
+    return false;
+  }
+
+  // 发布
+  document.getElementById('btnPublish').addEventListener('click', async function() {
+    const btn = this;
+    btn.textContent = '发布中...'; btn.disabled = true;
+    await publishDataToGithub(btn);
+    btn.textContent = '发布到线上'; btn.disabled = false;
   });
 
   /* ================================================================
@@ -3977,5 +4011,4 @@
   </script>
 </body>
 </html>
-
 
