@@ -4205,8 +4205,8 @@
     let activeVideoUrl = '';
 
     function readSettings() {
-      try { return JSON.parse(localStorage.getItem(HERO_KEY)) || {}; }
-      catch(e) { return {}; }
+      try { return JSON.parse(localStorage.getItem(HERO_KEY)) || { mode: 'video' }; }
+      catch(e) { return { mode: 'video' }; }
     }
     function saveSettings(s) { localStorage.setItem(HERO_KEY, JSON.stringify(s)); }
 
@@ -4399,7 +4399,7 @@
       activeVideoUrl = '';
       heroVideo.src = 'bg-video.mp4';
       await deleteVideoFile();
-      letSettings({ opacity: 78 });
+      letSettings({ opacity: 78, mode: 'video' });
     });
 
     document.getElementById('resetHeroPos').addEventListener('click', () => {
