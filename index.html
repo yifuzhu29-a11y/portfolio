@@ -3956,12 +3956,18 @@
         } catch(e) {}
       }
 
-      if(seedData && seedData.profile) {
+      // 优先使用本地数据；线上 data.json 仅作初始种子
+      const localData = await loadData();
+      if(seedData && seedData.profile && (!localData || !localData._localModified)) {
+        // 首次访问：用线上种子数据初始化
         appData = { ...getDefaultData(), ...seedData };
         normalizePortfolioData(appData);
         await saveData(appData);
       } else {
-        appData = normalizePortfolioData(await loadData());
+        // 已有本地数据：保留用户修改
+        appData = normalizePortfolioData(localData || getDefaultData());
+        // 后台静默标记本地已修改
+        if(!appData._localModified) { appData._localModified = true; await saveData(appData); }
       }
 
       if(!appData.sectionOrder) appData.sectionOrder = ['hero','about','projects','experience','skills','contact'];
