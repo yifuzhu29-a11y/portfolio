@@ -2318,6 +2318,7 @@
       name: normalizeText(project?.name, '未命名项目'),
       description: normalizeText(project?.description),
       images: normalizeArray(project?.images),
+      videos: normalizeArray(project?.videos),
       tags: normalizeArray(project?.tags),
       category: normalizeText(project?.category, '未分类')
     }));
@@ -2597,7 +2598,7 @@
     grid.innerHTML = projects.map((proj, idx) => {
       const featClass = proj.featured ? ' featured' : '';
       const coverH = proj.featured ? '260px' : '200px';
-      const hasVideos = (proj.videoCount || 0) > 0;
+      const hasVideos = (proj.videos || []).length > 0;
       let coverHtml;
       if(proj.images && proj.images.length>0)
         coverHtml = `<img class="project-cover" src="${proj.images[0]}" alt="${escapeHtml(proj.name)}" style="height:${coverH};">`;
@@ -3095,11 +3096,11 @@
     if(existing) existing.remove();
 
     const imgs = proj.images || [];
-    const videoCount = proj.videoCount || 0;
+    const projectVideos = proj.videos || [];
     // 构建媒体列表：图片 + 视频
     const mediaList = [];
     imgs.forEach(src => mediaList.push({ type:'image', src }));
-    for(let n = 0; n < videoCount; n++) mediaList.push({ type:'video', idx: n });
+    for(let n = 0; n < projectVideos.length; n++) mediaList.push({ type:'video', idx: n });
     const hasMedia = mediaList.length > 0;
     let carouselHtml;
     if(hasMedia) {
@@ -3155,12 +3156,11 @@
       async function ensureVideoLoaded(card) {
         const vidIdx = parseInt(card.dataset.video);
         if(isNaN(vidIdx) || loadedVideos[vidIdx]) return;
-        const file = await loadProjectVideo(proj.id, vidIdx);
-        if(!file) return;
-        const url = URL.createObjectURL(file);
-        loadedVideos[vidIdx] = url;
+        const base64 = projectVideos[vidIdx];
+        if(!base64) return;
+        loadedVideos[vidIdx] = base64;
         const video = document.createElement('video');
-        video.src = url;
+        video.src = base64;
         video.className = 'carousel-video';
         video.loop = true; video.muted = true; video.playsInline = true;
         video.setAttribute('playsinline','');
@@ -3432,7 +3432,7 @@
         Object.assign(proj, r);
         proj.featured = r.featured === 'true';
       } else {
-        appData.projects.push({ id: genId(), images: [], videoCount: 0, ...r, featured: r.featured === 'true' });
+        appData.projects.push({ id: genId(), images: [], videos: [], videoCount: 0, ...r, featured: r.featured === 'true' });
       }
       await saveAndRefresh();
     });
@@ -3533,30 +3533,34 @@
   async function manageProjectVideos(proj) {
     const MAX_VIDEOS = 5;
     const MAX_SIZE_MB = 50;
-    const existingKeys = await listProjectVideoKeys(proj.id, MAX_VIDEOS);
-    const videoCount = existingKeys.length;
-    proj.videoCount = videoCount;
+    // 确保 videos 数组存在
+    if(!proj.videos) proj.videos = [];
+    const videos = proj.videos;
+    proj.videoCount = videos.length;
+
+    function buildList() {
+      return videos.length === 0
+        ? '<p style="color:var(--muted);text-align:center;padding:20px;">暂无视频</p>'
+        : videos.map((v, n) => '<div style="display:flex;align-items:center;gap:10px;padding:8px 12px;margin-bottom:6px;background:var(--cream-dark);border-radius:8px;">'
+            + '<span style="font-size:24px;">🎬</span>'
+            + '<span style="flex:1;font-size:13px;">视频 ' + (n+1) + '</span>'
+            + '<button class="btn btn-sm btn-outline vid-play-btn" data-idx="' + n + '">▶</button>'
+            + '<button class="btn btn-sm btn-danger vid-del-btn" data-idx="' + n + '">🗑️</button>'
+            + '</div>').join('');
+    }
 
     const overlay = document.createElement('div');
     overlay.className = 'admin-form-modal';
-    overlay.innerHTML = `<div class="admin-form" style="max-width:500px;">
-      <button class="admin-form-close" id="vidClose">✕</button>
-      <h3>🎬 视频管理 — ${escapeHtml(proj.name)}</h3>
-      <p style="font-size:12px;color:var(--muted);margin-bottom:12px;">最多 ${MAX_VIDEOS} 段，单段 ≤ ${MAX_SIZE_MB} MB</p>
-      <div id="vidList" style="max-height:300px;overflow-y:auto;margin-bottom:14px;">
-        ${videoCount === 0 ? '<p style="color:var(--muted);text-align:center;padding:20px;">暂无视频</p>' :
-          existingKeys.map(n => `<div style="display:flex;align-items:center;gap:10px;padding:8px 12px;margin-bottom:6px;background:var(--cream-dark);border-radius:8px;">
-            <span style="font-size:24px;">🎬</span>
-            <span style="flex:1;font-size:13px;">视频 ${n+1}</span>
-            <button class="btn btn-sm btn-outline vid-play-btn" data-idx="${n}">▶</button>
-            <button class="btn btn-sm btn-danger vid-del-btn" data-idx="${n}">🗑️</button>
-          </div>`).join('')}
-      </div>
-      <div class="form-actions" style="justify-content:space-between;">
-        ${videoCount < MAX_VIDEOS ? `<button class="btn btn-primary" id="vidUploadBtn">📤 上传视频</button>` : '<span style="color:var(--red);font-size:12px;">已达上限</span>'}
-        <button class="btn btn-outline" id="vidDone">完成</button>
-      </div>
-    </div>`;
+    overlay.innerHTML = '<div class="admin-form" style="max-width:500px;">'
+      + '<button class="admin-form-close" id="vidClose">✕</button>'
+      + '<h3>🎬 视频管理 — ' + escapeHtml(proj.name) + '</h3>'
+      + '<p style="font-size:12px;color:var(--muted);margin-bottom:12px;">最多 ' + MAX_VIDEOS + ' 段，单段 ≤ ' + MAX_SIZE_MB + ' MB</p>'
+      + '<div id="vidList" style="max-height:300px;overflow-y:auto;margin-bottom:14px;">' + buildList() + '</div>'
+      + '<div class="form-actions" style="justify-content:space-between;">'
+      + (videos.length < MAX_VIDEOS ? '<button class="btn btn-primary" id="vidUploadBtn">📤 上传视频</button>' : '<span style="color:var(--red);font-size:12px;">已达上限</span>')
+      + '<button class="btn btn-outline" id="vidDone">完成</button>'
+      + '</div>'
+      + '</div>';
     document.body.appendChild(overlay);
 
     function close() { overlay.remove(); }
@@ -3564,33 +3568,32 @@
     overlay.querySelector('#vidDone').addEventListener('click', close);
     overlay.addEventListener('click', e => { if(e.target===overlay) close(); });
 
-    // 播放
+    // 播放 — 直接用 base64 数据
     overlay.querySelectorAll('.vid-play-btn').forEach(btn => {
-      btn.addEventListener('click', async function() {
+      btn.addEventListener('click', function() {
         const n = parseInt(this.dataset.idx);
-        const file = await loadProjectVideo(proj.id, n);
-        if(!file) { alert('视频加载失败'); return; }
-        const url = URL.createObjectURL(file);
         const video = document.createElement('video');
-        video.src = url; video.controls = true; video.autoplay = true;
+        video.src = videos[n]; video.controls = true; video.autoplay = true;
         video.style.cssText = 'position:fixed;inset:0;z-index:9999;background:#000;width:100%;height:100%;object-fit:contain;';
-        video.onended = () => { URL.revokeObjectURL(url); video.remove(); };
-        video.onclick = () => { URL.revokeObjectURL(url); video.remove(); };
+        video.onended = () => { video.remove(); };
+        video.onclick = () => { video.remove(); };
         document.body.appendChild(video);
       });
     });
 
-    // 删除
+    // 删除 — 直接从数组移除
     overlay.querySelectorAll('.vid-del-btn').forEach(btn => {
       btn.addEventListener('click', async function() {
         if(!confirm('确定删除这段视频？')) return;
-        await deleteProjectVideo(proj.id, parseInt(this.dataset.idx));
+        videos.splice(parseInt(this.dataset.idx), 1);
+        proj.videoCount = videos.length;
+        await saveAndRefresh();
         overlay.remove();
         manageProjectVideos(proj);
       });
     });
 
-    // 上传
+    // 上传 — 转 base64 存入 proj.videos
     const uploadBtn = overlay.querySelector('#vidUploadBtn');
     if(uploadBtn) {
       uploadBtn.addEventListener('click', () => {
@@ -3600,13 +3603,21 @@
           const file = this.files[0];
           if(!file) return;
           if(file.size > MAX_SIZE_MB * 1024 * 1024) {
-            alert(`文件过大（${(file.size/1024/1024).toFixed(1)} MB）！单个视频不能超过 ${MAX_SIZE_MB} MB。\n\n建议用剪映等工具压缩后再上传。`);
+            alert('文件过大（' + (file.size/1024/1024).toFixed(1) + ' MB）！单个视频不能超过 ' + MAX_SIZE_MB + ' MB。
+
+建议用剪映等工具压缩后再上传。');
             return;
           }
-          const nextIdx = existingKeys.length > 0 ? Math.max(...existingKeys) + 1 : 0;
-          await saveProjectVideo(proj.id, nextIdx, file);
-          overlay.remove();
-          manageProjectVideos(proj);
+          const reader = new FileReader();
+          reader.onload = async e => {
+            videos.push(e.target.result);
+            proj.videoCount = videos.length;
+            await saveAndRefresh();
+            overlay.remove();
+            manageProjectVideos(proj);
+          };
+          reader.onerror = () => { alert('视频读取失败，请重试。'); };
+          reader.readAsDataURL(file);
         };
         input.click();
       });
