@@ -1848,10 +1848,7 @@
     return new Promise((resolve, reject) => {
       const tx = db.transaction(STORE_NAME, 'readonly');
       const r = tx.objectStore(STORE_NAME).get(DATA_KEY);
-      r.onsuccess = () => {
-        if(r.result) resolve(r.result);
-        else { const d = getDefaultData(); saveData(d).then(() => resolve(d)); }
-      };
+      r.onsuccess = () => resolve(r.result || null);
       r.onerror = () => reject(r.error);
       tx.oncomplete = () => db.close();
     });
@@ -3478,7 +3475,7 @@
 
   // 导出
   document.getElementById('btnExport').addEventListener('click', async () => {
-    const d = await loadData();
+    const d = await loadData() || getDefaultData();
     const json = JSON.stringify(d, null, 2);
     const blob = new Blob([json], {type:'application/json'});
     const url = URL.createObjectURL(blob);
@@ -3956,18 +3953,14 @@
         } catch(e) {}
       }
 
-      // 优先使用本地数据；线上 data.json 仅作初始种子
       const localData = await loadData();
-      if(seedData && seedData.profile && (!localData || !localData._localModified)) {
-        // 首次访问：用线上种子数据初始化
-        appData = { ...getDefaultData(), ...seedData };
-        normalizePortfolioData(appData);
+      if(!localData) {
+        // 首次访问：用线上 data.json 或默认数据初始化
+        appData = normalizePortfolioData({ ...getDefaultData(), ...(seedData?.profile ? seedData : {}) });
         await saveData(appData);
       } else {
-        // 已有本地数据：保留用户修改
-        appData = normalizePortfolioData(localData || getDefaultData());
-        // 后台静默标记本地已修改
-        if(!appData._localModified) { appData._localModified = true; await saveData(appData); }
+        // 已有本地数据：始终保留，不被线上覆盖
+        appData = normalizePortfolioData(localData);
       }
 
       if(!appData.sectionOrder) appData.sectionOrder = ['hero','about','projects','experience','skills','contact'];
