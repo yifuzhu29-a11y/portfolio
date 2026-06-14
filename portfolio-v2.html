@@ -1020,9 +1020,9 @@
       }
       .top-search { top: 14px; right: 18px; }
       .nav-search { width: min(190px, 42vw); }
-      .hero { min-height: auto; }
+      .hero { min-height: 100vh; min-height: 100svh; }
       .hero-inner {
-        min-height: auto; left: 18px; bottom: 80px; right: auto;
+        min-height: auto; left: 18px; right: 18px; bottom: 96px;
         text-align: left; user-select: none; -webkit-user-select: none;
       }
       .eyebrow { justify-content: flex-start; }
@@ -1695,6 +1695,7 @@
   const DB_NAME = 'PortfolioV2';
   const STORE_NAME = 'userData';
   const DATA_KEY = 'main';
+  const DATA_SCHEMA_VERSION = 3;
   const ADMIN_PASSWORD = 'admin';
 
   /* ==== 生成演示占位图片 ==== */
@@ -1853,11 +1854,24 @@
       tx.oncomplete = () => db.close();
     });
   }
-  async function saveData(data) {
+  function markPortfolioData(data, options = {}) {
+    const now = options.updatedAt || new Date().toISOString();
+    const meta = {
+      ...(data.__meta || {}),
+      schemaVersion: DATA_SCHEMA_VERSION,
+      updatedAt: options.updatedAt || data.__meta?.updatedAt || now,
+      localSavedAt: now,
+      localDraft: options.localDraft !== false
+    };
+    return { ...data, __meta: meta };
+  }
+
+  async function saveData(data, options = {}) {
+    const dataToSave = markPortfolioData(data, options);
     const db = await openDB();
     return new Promise((resolve, reject) => {
       const tx = db.transaction(STORE_NAME, 'readwrite');
-      tx.objectStore(STORE_NAME).put(data, DATA_KEY);
+      tx.objectStore(STORE_NAME).put(dataToSave, DATA_KEY);
       tx.oncomplete = () => { db.close(); resolve(); };
       tx.onerror = () => { db.close(); reject(tx.error); };
     });
@@ -1910,6 +1924,10 @@
   function normalizePortfolioData(data) {
     data = (data && typeof data === 'object' && !Array.isArray(data)) ? data : {};
     const defaults = getDefaultData();
+    data.__meta = {
+      schemaVersion: DATA_SCHEMA_VERSION,
+      ...(data.__meta || {})
+    };
     data.profile = { ...defaults.profile, ...(data.profile || {}) };
     data.profile.heroHeading = data.profile.heroHeading || data.profile.name || defaults.profile.heroHeading;
     data.profile.aboutStyle = { ...getDefaultAboutStyle(), ...(data.profile.aboutStyle || {}) };
@@ -1937,6 +1955,30 @@
     });
     data.sectionOrder = normalizeArray(data.sectionOrder, defaults.sectionOrder);
     return data;
+  }
+
+  function dataTime(data, key) {
+    const t = Date.parse(data?.__meta?.[key] || '');
+    return Number.isFinite(t) ? t : 0;
+  }
+
+  function choosePortfolioData(seedData, localData) {
+    const remote = seedData ? normalizePortfolioData(seedData) : null;
+    const local = localData ? normalizePortfolioData(localData) : null;
+
+    if(location.protocol !== 'file:' && remote) {
+      const localHasPublishedMeta = Boolean(local?.__meta?.updatedAt);
+      const localIsDraft = local?.__meta?.localDraft === true;
+      const localDraftIsNewer = dataTime(local, 'localSavedAt') > dataTime(remote, 'updatedAt');
+      if(local && localIsDraft && localHasPublishedMeta && localDraftIsNewer) {
+        return { data: local, shouldSave: false };
+      }
+      return { data: remote, shouldSave: true };
+    }
+
+    if(local) return { data: local, shouldSave: false };
+    if(remote) return { data: remote, shouldSave: true };
+    return { data: normalizePortfolioData(getDefaultData()), shouldSave: true };
   }
 
   function hexToRgb(hex) {
@@ -3565,7 +3607,10 @@
       localStorage.setItem('gh_pub_tok', token);
     }
 
-    const clean = normalizePortfolioData(JSON.parse(JSON.stringify(appData || getDefaultData())));
+    const clean = markPortfolioData(
+      normalizePortfolioData(JSON.parse(JSON.stringify(appData || getDefaultData()))),
+      { localDraft: false }
+    );
     const json = JSON.stringify(clean);
     const enc = new TextEncoder();
     const bytes = enc.encode(json);
@@ -3592,7 +3637,7 @@
         body: JSON.stringify({ message:'更新数据', content:b64, sha:sha||undefined })
       });
       if(resp.ok) {
-        await saveData(clean);
+        await saveData(clean, { localDraft: false, updatedAt: clean.__meta.updatedAt });
         appData = clean;
         alert('发布成功！稍等几十秒后刷新线上页面即可看到最新内容。');
         return true;
@@ -3997,13 +4042,10 @@
       }
 
       const localData = await loadData();
-      if(!localData) {
-        // 首次访问：用线上 data.json 或默认数据初始化
-        appData = normalizePortfolioData({ ...getDefaultData(), ...(seedData?.profile ? seedData : {}) });
-        await saveData(appData);
-      } else {
-        // 已有本地数据：始终保留，不被线上覆盖
-        appData = normalizePortfolioData(localData);
+      const chosen = choosePortfolioData(seedData, localData);
+      appData = chosen.data;
+      if(chosen.shouldSave) {
+        await saveData(appData, { localDraft: false, updatedAt: appData.__meta?.updatedAt });
       }
 
       if(!appData.sectionOrder) appData.sectionOrder = ['hero','about','projects','experience','skills','contact'];
