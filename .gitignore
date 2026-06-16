@@ -1,0 +1,22 @@
+# Netlify 部署配置（不上传）
+.netlify/
+
+# 旧版文件
+index-new.html
+index-old.html
+/index.html
+portfolio-upgraded.html
+
+# 开发日志
+dev-log/
+
+# 临时/备份文件
+output/
+bg-video-backup.mp4
+github.txt
+"Liquid Chrome.txt"
+layard.txt
+
+# 参考源码
+Lanyard.reactbits.css
+Lanyard.reactbits.jsx
