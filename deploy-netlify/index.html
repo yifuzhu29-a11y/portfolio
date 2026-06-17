@@ -1403,18 +1403,18 @@
         <button class="btn btn-sm btn-outline add-btn section-bg-btn" data-section-id="experience">🎨 背景设置</button>
       </div>
       <div class="card-upgrade">
-        <h3 style="margin:0 0 4px;">🏫 在校经历</h3>
-        <div class="admin-section-controls">
-          <button class="btn btn-sm btn-outline add-btn" id="btnAddCampus">➕ 添加</button>
-        </div>
-        <div class="timeline" id="campusTimeline"><p style="color:var(--muted);">暂无</p></div>
-      </div>
-      <div class="card-upgrade">
         <h3 style="margin:0 0 4px;">💼 实习经历</h3>
         <div class="admin-section-controls">
           <button class="btn btn-sm btn-outline add-btn" id="btnAddIntern">➕ 添加</button>
         </div>
         <div class="timeline" id="internshipTimeline"><p style="color:var(--muted);">暂无</p></div>
+      </div>
+      <div class="card-upgrade">
+        <h3 style="margin:0 0 4px;">🏫 在校经历</h3>
+        <div class="admin-section-controls">
+          <button class="btn btn-sm btn-outline add-btn" id="btnAddCampus">➕ 添加</button>
+        </div>
+        <div class="timeline" id="campusTimeline"><p style="color:var(--muted);">暂无</p></div>
       </div>
       <div class="card-upgrade">
         <h3 style="margin:0 0 4px;">🎓 教育背景</h3>
@@ -2328,10 +2328,10 @@
   };
 
   function renderExperience() {
-    renderTimeline('campusTimeline', appData.campusExperience||[],
-      ['startDate','endDate','title','organization','description'], 'edit-campus', 'del-campus');
     renderTimeline('internshipTimeline', appData.internship||[],
       ['startDate','endDate','position','company','description'], 'edit-intern', 'del-intern');
+    renderTimeline('campusTimeline', appData.campusExperience||[],
+      ['startDate','endDate','title','organization','description'], 'edit-campus', 'del-campus');
 
     const edu = appData.education || [];
     const eduContainer = document.getElementById('educationTimeline');
